@@ -59,6 +59,7 @@ h1 {
 .barra,
 .haste {
   background-color: var(--primary-color);
+  border-radius: 5px;
 }
 
 .base {
@@ -92,6 +93,7 @@ h1 {
   width: 10px;
   height: 50px;
   transform: rotate(45deg);
+  border-radius: 0;
 }
 
 .corda {
@@ -110,26 +112,26 @@ h1 {
 .perna-esq,
 .perna-dir {
   border-radius: 5px;
-  /* display: none; */
 }
 
 .cabeca {
   position: absolute;
   top: 60px;
   left: 162.5px;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 5px solid var(--tertiary-color);
 }
 
 .corpo {
   position: absolute;
-  top: 95px;
+  top: 97px;
   left: 180px;
   width: 5px;
   height: 70px;
   background-color: var(--tertiary-color);
+
 }
 
 .braco-esq,
@@ -144,25 +146,25 @@ h1 {
 
 .braco-esq {
   top: 110px;
-  left: 148px;
+  left: 149px;
   transform: rotate(-45deg);
 }
 
 .braco-dir {
   top: 110px;
-  left: 177px;
+  left: 176px;
   transform: rotate(45deg);
 }
 
 .perna-esq {
   top: 175px;
-  left: 148px;
+  left: 149px;
   transform: rotate(-45deg);
 }
 
 .perna-dir {
   top: 175px;
-  left: 177px;
+  left: 176px;
   transform: rotate(45deg);
 }
 

@@ -170,7 +170,7 @@ function verificarLetra(letra) {
             confirmButton: "btn btn-primary",
           },
           title: `<i class="fa-solid fa-xmark"></i> Que pena, você perdeu!`,
-          text: `A palavra era: ${palavraAtual.toUpperCase()}`,
+          html: `A palavra era: <strong>${palavraAtual.toUpperCase()}</strong>. Tente novamente!`,
         })
         .then((result) => {
           if (!result.isConfirmed) return;
