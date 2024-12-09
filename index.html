@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Forca</h1>
+
+        <!-- Seleção de Categoria -->
+        <label for="categoria">Escolha uma categoria:</label>
+        <select id="categoria">
+            <option value="">Carregando...</option>
+        </select>
+
+        <button id="iniciarJogo">Iniciar Jogo</button>
+
+        <!-- Área da Forca -->
+        <div id="forca">
+            <div class="base"></div>
+            <div class="poste"></div>
+            <div class="barra"></div>
+            <div class="corda"></div>
+            <div class="cabeca"></div>
+            <div class="corpo"></div>
+            <div class="braco-esq"></div>
+            <div class="braco-dir"></div>
+            <div class="perna-esq"></div>
+            <div class="perna-dir"></div>
+        </div>
+
+        <!-- Palavra e Teclado -->
+        <div id="jogo">
+            <div id="dica"></div>
+            <div id="palavra"></div>
+            <div id="teclado"></div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>

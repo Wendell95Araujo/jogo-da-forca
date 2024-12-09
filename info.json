@@ -1,0 +1,7 @@
+{
+    "palavras": {
+      "carros": ["FERRARI", "MUSTANG", "VOLKSWAGEN"],
+      "frutas": ["BANANA", "MAÇÃ", "LARANJA"],
+      "animais": ["ELEFANTE", "GATO", "CACHORRO"]
+    }
+  }

@@ -1,0 +1,134 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+#forca {
+    position: relative;
+    margin: 20px auto;
+    width: 200px;
+    height: 300px;
+}
+
+.base, .poste, .barra, .corda {
+    background-color: #654321;
+}
+
+.base {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 10px;
+}
+
+.poste {
+    position: absolute;
+    bottom: 10px;
+    left: 50px;
+    width: 10px;
+    height: 250px;
+}
+
+.barra {
+    position: absolute;
+    top: 0;
+    left: 50px;
+    width: 100px;
+    height: 10px;
+}
+
+.corda {
+    position: absolute;
+    top: 10px;
+    left: 140px;
+    width: 5px;
+    height: 50px;
+    background-color: #c0c0c0;
+}
+
+.cabeca, .corpo, .braco-esq, .braco-dir, .perna-esq, .perna-dir {
+    display: none;
+}
+
+.cabeca {
+    position: absolute;
+    top: 60px;
+    left: 125px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ffcc99;
+    border: 2px solid #000;
+}
+
+.corpo {
+    position: absolute;
+    top: 90px;
+    left: 138px;
+    width: 5px;
+    height: 70px;
+    background-color: #000;
+}
+
+.braco-esq, .braco-dir, .perna-esq, .perna-dir {
+    position: absolute;
+    width: 40px;
+    height: 5px;
+    background-color: #000;
+}
+
+.braco-esq {
+    top: 100px;
+    left: 98px;
+    transform: rotate(-45deg);
+}
+
+.braco-dir {
+    top: 100px;
+    left: 138px;
+    transform: rotate(45deg);
+}
+
+.perna-esq {
+    top: 160px;
+    left: 98px;
+    transform: rotate(45deg);
+}
+
+.perna-dir {
+    top: 160px;
+    left: 138px;
+    transform: rotate(-45deg);
+}
+
+#palavra {
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+#teclado button {
+    margin: 5px;
+    padding: 10px;
+    font-size: 18px;
+    cursor: pointer;
+}
