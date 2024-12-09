@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik+Bubbles&family=Special+Elite&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/480d2553e7.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -20,14 +21,29 @@
 </head>
 <body>
     <div class="container">
+        
         <h1>Jogo da Forca</h1>
-        <div class="container-form">
-            <label for="categoria">Selecione uma categoria:</label>
-            <select id="categoria">
-                <option value="">Carregando...</option>
-            </select>
-            <button id="iniciarJogo">Iniciar Jogo</button>
+
+        <div class="container-buttons">
+            <button id="iniciarJogo">
+                <i class="fa-solid fa-play"></i>
+                <span>Iniciar Jogo</span>
+            </button>
+            <button id="reiniciarJogo">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Reiniciar Jogo</span>
+            </button>
+            <button id="configuracoes">
+                <i class="fa-solid fa-cog"></i>
+                <span>Configurações</span>
+            </button>
         </div>
+
+        <div id="Pontuações">
+            <p id="pontuacao"></p>
+            <p id="record"></p>
+        </div>
+
         <div id="forca">
             <div class="base"></div>
             <div class="poste"></div>
@@ -42,7 +58,6 @@
             <div class="perna-dir"></div>
         </div>
 
-        <!-- Palavra e Teclado -->
         <div id="jogo">
             <div id="dica"></div>
             <div id="palavra"></div>

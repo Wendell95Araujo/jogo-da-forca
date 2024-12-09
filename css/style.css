@@ -1,14 +1,27 @@
-body {
+:root {
+  --primary-color: #654321;
+  --secondary-color: #fff;
+  --tertiary-color: #000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: "Roboto", sans-serif;
+}
+
+body {
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   height: 100vh;
-  background-color: #fff;
+  background-color: var(--secondary-color);
 }
 
+/* Container */
 .container {
   text-align: center;
   padding: 20px;
@@ -16,21 +29,24 @@ body {
   width: 100%;
 }
 
+.container-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto;
+  gap: 10px;
+}
+
+/* Header */
 h1 {
   font-family: "Special Elite", system-ui;
   font-size: 48px;
   font-weight: 600;
   margin: 20px auto;
-  color: #000;
+  color: var(--primary-color);
 }
 
-.container-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
+/* Forca */
 #forca {
   position: relative;
   margin: 20px auto;
@@ -42,7 +58,7 @@ h1 {
 .poste,
 .barra,
 .haste {
-  background-color: #654321;
+  background-color: var(--primary-color);
 }
 
 .base {
@@ -58,14 +74,14 @@ h1 {
   bottom: 0;
   left: 20px;
   width: 10px;
-  height: 300px;
+  height: 100%;
 }
 
 .barra {
   position: absolute;
   top: 0;
   left: 10px;
-  width: 150px;
+  width: 100%;
   height: 10px;
 }
 
@@ -81,7 +97,7 @@ h1 {
 .corda {
   position: absolute;
   top: 10px;
-  left: 140px;
+  left: 180px;
   width: 5px;
   height: 50px;
   background-color: #ccc;
@@ -94,26 +110,26 @@ h1 {
 .perna-esq,
 .perna-dir {
   border-radius: 5px;
-  display: none;
+  /* display: none; */
 }
 
 .cabeca {
   position: absolute;
   top: 60px;
-  left: 122.5px;
+  left: 162.5px;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 5px solid #000;
+  border: 5px solid var(--tertiary-color);
 }
 
 .corpo {
   position: absolute;
   top: 95px;
-  left: 140px;
+  left: 180px;
   width: 5px;
   height: 70px;
-  background-color: #000;
+  background-color: var(--tertiary-color);
 }
 
 .braco-esq,
@@ -123,42 +139,76 @@ h1 {
   position: absolute;
   width: 40px;
   height: 5px;
-  background-color: #000;
+  background-color: var(--tertiary-color);
 }
 
 .braco-esq {
   top: 110px;
-  left: 108px;
+  left: 148px;
   transform: rotate(-45deg);
 }
 
 .braco-dir {
   top: 110px;
-  left: 137px;
+  left: 177px;
   transform: rotate(45deg);
 }
 
 .perna-esq {
   top: 175px;
-  left: 108px;
+  left: 148px;
   transform: rotate(-45deg);
 }
 
 .perna-dir {
   top: 175px;
-  left: 137px;
+  left: 177px;
   transform: rotate(45deg);
 }
 
-#palavra {
-  font-size: 24px;
-  letter-spacing: 10px;
-  margin: 20px 0;
+/* Botões */
+button,
+.btn {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: 600;
+  border: none;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
 }
 
-#teclado {
+button:hover:not(:disabled),
+.btn:hover {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3) !important;
+  background-image: none !important;
+}
+
+#reiniciarJogo {
+  display: none;
+}
+
+#teclado, .teclado-linha, .teclado-completo {
   max-width: 650px;
   margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+
+.teclado-completo {
+  display: none;
 }
 
 #teclado button {
@@ -168,28 +218,20 @@ h1 {
   cursor: pointer;
   width: 40px;
   height: 40px;
-  color: #fff;
-  background-color: #654321;
-  border: 1px solid #654321;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease-in-out;
+  border: 1px solid var(--primary-color);
+  font-weight: 900;
 }
 
 #teclado button.correta {
-  background-color: #4CAF50;
-  border-color: #4CAF50;
+  border-color: #4caf50;
+  background-color: #4caf50;
+  color: var(--secondary-color);
 }
 
 #teclado button.errada {
-  background-color: #f44336;
   border-color: #f44336;
-}
-
-#teclado button:hover:not(:disabled) {
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-  color: #654321;
-  background-color: #fff;
+  background-color: #f44336;
+  color: var(--secondary-color);
 }
 
 #teclado button:disabled {
@@ -197,15 +239,105 @@ h1 {
   opacity: 0.5;
 }
 
+/* Textos */
+#Pontuações {
+  display: none;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 0 auto;
+  gap: 10px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+#Pontuações p {
+  margin: 10px 0;
+}
+
+#jogo {
+  color: var(--primary-color);
+}
+
+#palavra {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 10px;
+  margin: 20px 0;
+}
+
+/*swal alert*/
+.swal2-container {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #654321ad !important;
+}
+
+.swal2-toast {
+  width: 360px !important;
+}
+
+.swal2-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 20px auto;
+  color: var(--primary-color);
+}
+
+.container-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 250px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.form-label {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.swal2-input {
+  border-color: var(--primary-color);
+  border-radius: 5px;
+  color: var(--primary-color);
+  display: block;
+  width: 100%;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+  opacity: 0.8;
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+/* Responsividade */
+@media screen and (max-width: 576px) {
+  .teclado-completo {
+    display: flex;
+  }
+
+  .teclado-linha {
+    display: none;
+  }
+}
 
 @media screen and (max-width: 480px) {
+  h1 {
+    margin-top: 0;
+  }
 
-    h1 {
-        margin-top: 0;
-    }
-
-    #teclado button {
-        padding: 5px;
-        font-size: 14px;
-    }
+  #teclado button {
+    padding: 5px;
+    font-size: 14px;
+  }
 }
