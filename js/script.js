@@ -1,14 +1,3 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyBc7bsTNRmThM989rENIf9jYxLtOCPWRBk",
-  authDomain: "jogo-da-forca-1faed.firebaseapp.com",
-  databaseURL: "https://jogo-da-forca-1faed-default-rtdb.firebaseio.com",
-  projectId: "jogo-da-forca-1faed",
-  storageBucket: "jogo-da-forca-1faed.firebasestorage.app",
-  messagingSenderId: "635259446092",
-  appId: "1:635259446092:web:2b86b6a80f111f1064e5e9",
-};
-
-firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // Seletores jQuery
@@ -31,6 +20,8 @@ const partesBoneco = [
 // Variáveis do jogo
 let palavraAtual = "";
 let erros = 0;
+let pontuacao = 0;
+let pontuacaoMax = localStorage.getItem("pontuacaoMax") || 0;
 
 // Função para carregar categorias do Firebase
 function carregarCategorias() {
@@ -38,9 +29,7 @@ function carregarCategorias() {
   categoriasRef.once("value").then((snapshot) => {
     if (snapshot.exists()) {
       const categorias = snapshot.val();
-      $categoriaSelect
-        .empty()
-        .append("<option value=''>Escolha uma categoria</option>");
+      $categoriaSelect.empty().append("<option value='todas'>Todas</option>");
       $.each(categorias, (categoria, palavras) => {
         $categoriaSelect.append(
           `<option value="${categoria}">${categoria}</option>`
@@ -50,24 +39,46 @@ function carregarCategorias() {
   });
 }
 
-carregarCategorias();
-
 // Função para iniciar o jogo
 function iniciarJogo() {
   const categoria = $categoriaSelect.val();
-  if (!categoria) {
-    alert("Selecione uma categoria!");
-    return;
-  }
+  let categoriaText = "";
 
-  const palavrasRef = db.ref(`palavras/${categoria}`);
+  const palavrasRef = db.ref(
+    categoria === "todas" ? "palavras" : `palavras/${categoria}`
+  );
   palavrasRef.once("value").then((snapshot) => {
     if (snapshot.exists()) {
-      const palavras = snapshot.val();
-      palavraAtual =
-        palavras[Math.floor(Math.random() * palavras.length)].toUpperCase();
-      $dicaDiv.text(`Categoria: ${categoria}`);
-      $palavraDiv.text("_ ".repeat(palavraAtual.length).trim());
+      let palavras = [];
+      if (categoria === "todas") {
+        snapshot.forEach((catSnap) => {
+          palavras.push(...catSnap.val());
+        });
+      } else {
+        palavras = snapshot.val();
+      }
+      const usadas = JSON.parse(sessionStorage.getItem("palavrasUsadas")) || [];
+      palavras = palavras.filter((palavra) => !usadas.includes(palavra));
+
+      if (palavras.length === 0) {
+        sessionStorage.removeItem("palavrasUsadas");
+        iniciarJogo();
+        return;
+      }
+
+      palavraAtual = palavras[Math.floor(Math.random() * palavras.length)];
+      usadas.push(palavraAtual);
+      sessionStorage.setItem("palavrasUsadas", JSON.stringify(usadas));
+
+      if (categoria === "todas") {
+        const categoriaPalavra = Object.keys(snapshot.val()).find(cat => snapshot.val()[cat].includes(palavraAtual));
+        categoriaText = categoriaPalavra ? categoriaPalavra : "Categoria desconhecida";
+      } else {
+        categoriaText = categoria;
+      }
+
+      $dicaDiv.text(`CATEGORIA: ${categoriaText.toUpperCase()}`);
+      mostrarPalavra();
       criarTeclado();
       erros = 0;
       partesBoneco.forEach((parte) => parte.hide());
@@ -75,40 +86,81 @@ function iniciarJogo() {
   });
 }
 
+function mostrarPalavra() {
+  const palavraFormatada = Array.from(palavraAtual)
+    .map((letra) => {
+      if (letra === " ") return " ";
+      if (letra === "-") return "-";
+      return "_";
+    })
+    .join("");
+
+  $palavraDiv.text(palavraFormatada);
+}
+
+function verificarLetra(letra, $botao) {
+  if (!letra) return;
+
+  const letraNormalizada = normalizarString(letra.toUpperCase());
+  const palavraNormalizada = normalizarString(palavraAtual);
+  const letrasExibidas = $palavraDiv.text().split("");
+
+  const letrasNaPalavra = Array.from(palavraNormalizada);
+  const letrasNaPalavraPadrao = Array.from(palavraAtual.toUpperCase());
+
+  $botao.prop("disabled", true);
+
+  if (letrasNaPalavra.includes(letraNormalizada)) {
+    letrasNaPalavra.forEach((l, i) => {
+      if (l === letra) letrasExibidas[i] = letrasNaPalavraPadrao[i];
+    });
+    $botao.addClass("correta");
+    $palavraDiv.text(letrasExibidas.join(""));
+
+    if (!letrasExibidas.includes("_")) {
+      alert("Parabéns, você venceu!");
+      pontuacao++;
+      if (pontuacao > pontuacaoMax) {
+        pontuacaoMax = pontuacao;
+        localStorage.setItem("pontuacaoMax", pontuacaoMax);
+      }
+      iniciarJogo();
+    }
+  } else {
+    erros++;
+    $botao.addClass("errada");
+    if (erros < partesBoneco.length) {
+      partesBoneco[erros - 1].show();
+    } else {
+      alert(`Você perdeu! A palavra era: ${palavraAtual}`);
+      pontuacao = 0;
+      iniciarJogo();
+    }
+  }
+}
+
+// Função para remover acentos e caracteres especiais
+function normalizarString(str) {
+  if (typeof str !== "string") {
+    return str;
+  }
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+}
+
 // Função para criar o teclado
 function criarTeclado() {
   $tecladoDiv.empty();
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((letra) => {
     const $botao = $(`<button>${letra}</button>`);
-    $botao.on("click", () => verificarLetra(letra));
+    $botao.on("click", () => verificarLetra(letra, $botao));
     $tecladoDiv.append($botao);
   });
 }
 
-// Função para verificar a letra
-function verificarLetra(letra) {
-  const letrasPalavra = palavraAtual.split("");
-  const letrasExibidas = $palavraDiv.text().split(" ");
-  if (letrasPalavra.includes(letra)) {
-    letrasPalavra.forEach((l, i) => {
-      if (l === letra) letrasExibidas[i] = letra;
-    });
-    $palavraDiv.text(letrasExibidas.join(" "));
-    if (!letrasExibidas.includes("_")) alert("Você ganhou!");
-  } else {
-    mostrarErro();
-  }
-}
-
-// Função para mostrar um erro (desenhar o boneco)
-function mostrarErro() {
-  if (erros < partesBoneco.length) {
-    partesBoneco[erros].show();
-    erros++;
-    if (erros === partesBoneco.length)
-      alert(`Você perdeu! A palavra era ${palavraAtual}`);
-  }
-}
-
 // Evento de clique para iniciar o jogo
 $iniciarJogoBtn.on("click", iniciarJogo);
+
+carregarCategorias();
