@@ -147,6 +147,7 @@ function verificarLetra(letra) {
         pontuacao++;
         if (pontuacao > pontuacaoMax) {
           pontuacaoMax = pontuacao;
+          localStorage.setItem("pontuacaoMax", pontuacaoMax);
           $record.text(`Recorde: ${pontuacaoMax}`);
         }
         $pontuacao.text(`Pontuação: ${pontuacao}`);
