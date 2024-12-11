@@ -141,7 +141,7 @@ function verificarLetra(letra) {
         customClass: {
           confirmButton: "btn btn-primary",
         },
-        title: `<i class="fa-solid fa-check"></i> Parabéns, você venceu!`,
+        title: `<i class="fa-solid fa-check"></i> Parabéns, você acertou a palavra!`,
       }).then((result) => {
         if (!result.isConfirmed) return;
         pontuacao++;
