@@ -26,8 +26,9 @@ let categoriasList = [];
 let categoriaSelect = localStorage.getItem("categoriaSelect") || "todas";
 let palavraAtual = "";
 let erros = 0;
-let pontuacao = 0;
+let pontuacao = parseInt(localStorage.getItem("pontuacao")) || 0;
 let pontuacaoMax = localStorage.getItem("pontuacaoMax") || 0;
+let letrasclicadas = [];
 
 // Função para carregar categorias do Firebase
 function carregarCategorias() {
@@ -46,6 +47,7 @@ function carregarCategorias() {
 
 // Função para iniciar o jogo
 function iniciarJogo() {
+  letrasclicadas = [];
   $pontuacoesDiv.css("display", "flex");
   $pontuacao.text(`Pontuação: ${pontuacao}`);
   $record.text(`Recorde: ${pontuacaoMax}`);
@@ -114,6 +116,9 @@ function mostrarPalavra() {
 
 function verificarLetra(letra) {
   if (!letra) return;
+  if (letrasclicadas.includes(letra)) return;
+
+  letrasclicadas.push(letra);
 
   const letraNormalizada = normalizarString(letra.toUpperCase());
   const palavraNormalizada = normalizarString(palavraAtual);
@@ -145,6 +150,7 @@ function verificarLetra(letra) {
       }).then((result) => {
         if (!result.isConfirmed) return;
         pontuacao++;
+        localStorage.setItem("pontuacao", pontuacao);
         if (pontuacao > pontuacaoMax) {
           pontuacaoMax = pontuacao;
           localStorage.setItem("pontuacaoMax", pontuacaoMax);
@@ -176,6 +182,7 @@ function verificarLetra(letra) {
         .then((result) => {
           if (!result.isConfirmed) return;
           pontuacao = 0;
+          localStorage.setItem("pontuacao", pontuacao);
           iniciarJogo();
         });
     }
@@ -197,35 +204,47 @@ function normalizarString(str) {
 function criarTeclado() {
   $tecladoDiv.empty();
 
-  const $teclado = $(`<div id="tecladoCompleto" class="teclado-completo"></div>`);
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((letra) => {
-    const $botao = $(`<button class="letra${letra}">${letra}</button>`);
-    $botao.on("click", () => verificarLetra(letra));
-    $teclado.append($botao);
-  });
+  const todasAsLetras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const linhas = [
+    { id: "tecladoCompleto", classe: "teclado-completo", letras: todasAsLetras },
+    { id: "teclado-linha1", classe: "teclado-linha", letras: "QWERTYUIOP" },
+    { id: "teclado-linha2", classe: "teclado-linha", letras: "ASDFGHJKL" },
+    { id: "teclado-linha3", classe: "teclado-linha", letras: "ZXCVBNM" },
+  ];
 
-  const $tecladoDiv1 = $(`<div id="teclado-linha1" class="teclado-linha"></div>`);
-  "QWERTYUIOP".split("").forEach((letra) => {
-    const $botao = $(`<button class="letra${letra}">${letra}</button>`);
-    $botao.on("click", () => verificarLetra(letra));
-    $tecladoDiv1.append($botao);
-  });
-
-    const $tecladoDiv2 = $(`<div id="teclado-linha2" class="teclado-linha"></div>`);
-    "ASDFGHJKL".split("").forEach((letra) => {
+  const criarLinha = ({ id, classe, letras }) => {
+    const $linha = $(`<div id="${id}" class="${classe}"></div>`);
+    letras.split("").forEach((letra) => {
       const $botao = $(`<button class="letra${letra}">${letra}</button>`);
       $botao.on("click", () => verificarLetra(letra));
-      $tecladoDiv2.append($botao);
+      $linha.append($botao);
     });
+    return $linha;
+  };
 
-    const $tecladoDiv3 = $(`<div id="teclado-linha3" class="teclado-linha"></div>`);
-    "ZXCVBNM".split("").forEach((letra) => {
-      const $botao = $(`<button class="letra${letra}">${letra}</button>`);
-      $botao.on("click", () => verificarLetra(letra));
-      $tecladoDiv3.append($botao);
-    });
+  linhas.forEach((linha) => {
+    $tecladoDiv.append(criarLinha(linha));
+  });
 
-    $tecladoDiv.append($teclado, $tecladoDiv1, $tecladoDiv2, $tecladoDiv3);
+  $(document).on("keydown", (e) => {
+    const letra = e.key.toUpperCase();
+    if (todasAsLetras.includes(letra)) {
+      verificarLetra(letra);
+    } else {
+      swal.fire({
+        toast: true,
+        position: "center",
+        showConfirmButton: true,
+        allowEscapeKey: false,
+        confirmButtonText: "OK",
+        customClass: {
+          confirmButton: "btn btn-primary",
+        },
+        title: `<i class="fa-solid fa-circle-exclamation"></i> Letra inválida!`,
+        text: `A tecla (${letra}) não é permitida. Por favor use apenas letras (A-Z).`,
+      });
+    }
+  });
 }
 
 // Evento de clique para iniciar o jogo
@@ -236,7 +255,8 @@ $reiniciarJogoBtn.on("click", () => {
   if (pontuacao === 0) {
     iniciarJogo();
   } else {
-    swal.fire({
+    swal
+      .fire({
         toast: true,
         position: "center",
         showConfirmButton: true,
@@ -249,11 +269,14 @@ $reiniciarJogoBtn.on("click", () => {
           cancelButton: "btn btn-secondary",
         },
         title: `<i class="fa-solid fa-rotate-right"></i> Reiniciar Jogo?`,
-        text: `Sua pontuação atual é ${pontuacao} ${pontuacao === 1 ? "ponto" : "pontos"}. Tem certeza que deseja reiniciar o jogo? Você perderá essa pontuação.`,
+        text: `Sua pontuação atual é ${pontuacao} ${
+          pontuacao === 1 ? "ponto" : "pontos"
+        }. Tem certeza que deseja reiniciar o jogo? Você perderá essa pontuação.`,
       })
       .then((result) => {
         if (!result.isConfirmed) return;
         pontuacao = 0;
+        localStorage.setItem("pontuacao", pontuacao);
         iniciarJogo();
       });
   }
