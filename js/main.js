@@ -20,12 +20,14 @@ const partesBoneco = [
 ];
 
 // Variáveis do jogo
+let userLog = null;
+let userLogado = null;
 let categoriasList = [];
 let categoriaSelect = localStorage.getItem("categoriaSelect") || "todas";
 let palavraAtual = "";
 let erros = 0;
-let pontuacao = parseInt(localStorage.getItem("pontuacao")) || 0;
-let pontuacaoMax = localStorage.getItem("pontuacaoMax") || 0;
+let pontuacao;
+let pontuacaoMax;
 let letrasclicadas = [];
 
 // Função para carregar categorias do Firebase
@@ -53,6 +55,13 @@ function iniciarJogo() {
   $reiniciarJogoBtn.css("display", "flex");
   const categoria = categoriaSelect || "todas";
   let categoriaText = "";
+
+  if (userLog) {
+    db.ref(`jogadores/${userLog.uid}`).update({
+      recorde: pontuacaoMax,
+      pontuacao: pontuacao,
+    });
+  }
 
   const palavrasRef = db.ref(
     categoria === "todas" ? "palavras" : `palavras/${categoria}`
@@ -204,7 +213,11 @@ function criarTeclado() {
 
   const todasAsLetras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const linhas = [
-    { id: "tecladoCompleto", classe: "teclado-completo", letras: todasAsLetras },
+    {
+      id: "tecladoCompleto",
+      classe: "teclado-completo",
+      letras: todasAsLetras,
+    },
     { id: "teclado-linha1", classe: "teclado-linha", letras: "QWERTYUIOP" },
     { id: "teclado-linha2", classe: "teclado-linha", letras: "ASDFGHJKL" },
     { id: "teclado-linha3", classe: "teclado-linha", letras: "ZXCVBNM" },
@@ -228,19 +241,6 @@ function criarTeclado() {
     const letra = e.key.toUpperCase();
     if (todasAsLetras.includes(letra)) {
       verificarLetra(letra);
-    } else {
-      swal.fire({
-        toast: true,
-        position: "center",
-        showConfirmButton: true,
-        allowEscapeKey: false,
-        confirmButtonText: "OK",
-        customClass: {
-          confirmButton: "btn btn-primary",
-        },
-        title: `<i class="fa-solid fa-circle-exclamation"></i> Letra inválida!`,
-        text: `A tecla (${letra}) não é permitida. Por favor use apenas letras (A-Z).`,
-      });
     }
   });
 }
