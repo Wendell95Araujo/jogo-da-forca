@@ -6,6 +6,9 @@ const $tecladoDiv = $("#teclado");
 const $dicaDiv = $("#dica");
 const $configButton = $("#configuracoes");
 const $pontuacoesDiv = $("#Pontuações");
+const $btnTop10 = $("#btnTop10");
+const $btnLogin = $("#btnLogin");
+const $btnLogout = $("#btnLogout");
 const $pontuacao = $("#pontuacao");
 const $record = $("#record");
 
@@ -23,12 +26,13 @@ const partesBoneco = [
 let userLog = null;
 let userLogado = null;
 let categoriasList = [];
-let categoriaSelect = localStorage.getItem("categoriaSelect") || "todas";
+let categoriaSelect = localStorage.getItem("categoriasSelect") || "todas";
 let palavraAtual = "";
 let erros = 0;
 let pontuacao;
 let pontuacaoMax;
 let letrasclicadas = [];
+let top10List = [];
 
 // Função para carregar categorias do Firebase
 function carregarCategorias() {
@@ -36,10 +40,9 @@ function carregarCategorias() {
   categoriasRef.once("value").then((snapshot) => {
     if (snapshot.exists()) {
       const categorias = snapshot.val();
+      categoriasList = [];
       $.each(categorias, (categoria, palavras) => {
-        categoriasList.push(
-          `<option value="${categoria}">${categoria.toUpperCase()}</option>`
-        );
+        categoriasList.push(categoria);
       });
     }
   });
@@ -53,60 +56,73 @@ function iniciarJogo() {
   $record.text(`Recorde: ${pontuacaoMax}`);
   $iniciarJogoBtn.hide();
   $reiniciarJogoBtn.css("display", "flex");
-  const categoria = categoriaSelect || "todas";
-  let categoriaText = "";
+
+  const categoriasSelecionadas =
+    categoriaSelect && categoriaSelect.length > 0 ? categoriaSelect : ["todas"];
+
+  let palavras = [];
 
   if (userLog) {
     db.ref(`jogadores/${userLog.uid}`).update({
       recorde: pontuacaoMax,
       pontuacao: pontuacao,
+      categorias: categoriasSelecionadas,
     });
   }
 
-  const palavrasRef = db.ref(
-    categoria === "todas" ? "palavras" : `palavras/${categoria}`
-  );
-  palavrasRef.once("value").then((snapshot) => {
-    if (snapshot.exists()) {
-      let palavras = [];
-      if (categoria === "todas") {
-        snapshot.forEach((catSnap) => {
-          palavras.push(...catSnap.val());
-        });
-      } else {
-        palavras = snapshot.val();
-      }
-      const usadas = JSON.parse(sessionStorage.getItem("palavrasUsadas")) || [];
-      palavras = palavras.filter((palavra) => !usadas.includes(palavra));
+  const palavrasRef = db.ref("palavras");
+  palavrasRef
+    .once("value")
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        if (categoriasSelecionadas.includes("todas")) {
+          snapshot.forEach((catSnap) => {
+            palavras.push(...catSnap.val());
+          });
+        } else {
+          categoriasSelecionadas.forEach((categoria) => {
+            if (snapshot.val()[categoria]) {
+              palavras.push(...snapshot.val()[categoria]);
+            }
+          });
+        }
 
-      if (palavras.length === 0) {
-        sessionStorage.removeItem("palavrasUsadas");
-        iniciarJogo();
-        return;
-      }
+        const usadasCompressed = sessionStorage.getItem("palavrasUsadas") || "";
+        const usadas = usadasCompressed ? usadasCompressed.split(",") : [];
 
-      palavraAtual = palavras[Math.floor(Math.random() * palavras.length)];
-      usadas.push(palavraAtual);
-      sessionStorage.setItem("palavrasUsadas", JSON.stringify(usadas));
+        palavras = palavras.filter((palavra) => !usadas.includes(palavra));
 
-      if (categoria === "todas") {
+        if (palavras.length === 0) {
+          sessionStorage.removeItem("palavrasUsadas");
+          iniciarJogo();
+          return;
+        }
+
+        palavraAtual = palavras[Math.floor(Math.random() * palavras.length)];
+        usadas.push(palavraAtual);
+        const novasUsadasCompressed = usadas.join(",");
+        sessionStorage.setItem("palavrasUsadas", novasUsadasCompressed);
+
         const categoriaPalavra = Object.keys(snapshot.val()).find((cat) =>
           snapshot.val()[cat].includes(palavraAtual)
         );
-        categoriaText = categoriaPalavra
-          ? categoriaPalavra
-          : "Categoria desconhecida";
-      } else {
-        categoriaText = categoria;
-      }
+        const categoriaText = categoriaPalavra || "Categoria desconhecida";
 
-      $dicaDiv.text(`CATEGORIA: ${categoriaText.toUpperCase()}`);
-      mostrarPalavra();
-      criarTeclado();
-      erros = 0;
-      partesBoneco.forEach((parte) => parte.hide());
-    }
-  });
+        $dicaDiv.text(`CATEGORIA: ${categoriaText.toUpperCase()}`);
+        mostrarPalavra();
+        criarTeclado();
+        erros = 0;
+        partesBoneco.forEach((parte) => parte.hide());
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao carregar palavras:", error);
+      Swal.fire(
+        "Erro",
+        "Não foi possível carregar as palavras. Tente novamente.",
+        "error"
+      );
+    });
 }
 
 function mostrarPalavra() {
@@ -149,7 +165,7 @@ function verificarLetra(letra) {
         position: "center",
         showConfirmButton: true,
         allowEscapeKey: false,
-        confirmButtonText: "Continuar",
+        confirmButtonText: `<i class="fa-solid fa-check"></i> Continuar`,
         customClass: {
           confirmButton: "btn btn-primary",
         },
@@ -179,7 +195,7 @@ function verificarLetra(letra) {
           position: "center",
           showConfirmButton: true,
           allowEscapeKey: false,
-          confirmButtonText: "Novo Jogo",
+          confirmButtonText: `<i class="fa-solid fa-rotate-right"></i> Novo Jogo`,
           customClass: {
             confirmButton: "btn btn-primary",
           },
@@ -259,9 +275,9 @@ $reiniciarJogoBtn.on("click", () => {
         position: "center",
         showConfirmButton: true,
         allowEscapeKey: false,
-        confirmButtonText: "Novo Jogo",
+        confirmButtonText: `<i class="fa-solid fa-rotate-right"></i> Reiniciar Jogo`,
         showCancelButton: true,
-        cancelButtonText: "Cancelar",
+        cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
         customClass: {
           confirmButton: "btn btn-primary",
           cancelButton: "btn btn-secondary",
@@ -286,15 +302,28 @@ $configButton.on("click", () => {
     title: `<i class="fa-solid fa-cog"></i> Configurações`,
     html: `
     <div class="container-form">
-      <label for="categoria" class="form-label">Selecione uma categoria:</label>
-            <select id="categoria" class="swal2-input">
-                <option value='todas'>TODAS</option>
-                ${categoriasList.join("")}
-            </select>
+      <label for="categoria" class="form-label">Selecione as categorias:</label>
+      <div id="categoriaCheckboxes">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input categoria-checkbox" id="todas" value="todas">
+          <label class="form-check-label" for="todas">TODAS</label>
+        </div>
+        ${categoriasList
+          .map(
+            (categoria) => `
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input categoria-checkbox" id="${categoria}" value="${categoria}">
+              <label class="form-check-label" for="${categoria}">${categoria.toUpperCase()}</label>
+            </div>
+          `
+          )
+          .join("")}
+      </div>
     </div>
     `,
     showCancelButton: true,
-    confirmButtonText: "Salvar",
+    confirmButtonText: `<i class="fas fa-save"></i> Salvar`,
+    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
     showLoaderOnConfirm: true,
     customClass: {
       confirmButton: "btn btn-primary",
@@ -302,15 +331,124 @@ $configButton.on("click", () => {
       title: "swal2-title",
     },
     didOpen: () => {
-      $("#categoria").val(categoriaSelect);
+      const selectedCategorias = JSON.parse(
+        localStorage.getItem("categoriasSelect")
+      ) || ["todas"];
+
+      if (selectedCategorias.includes("todas")) {
+        $("#categoriaCheckboxes input").prop("checked", true);
+      } else {
+        selectedCategorias.forEach((cat) => {
+          $(`#categoriaCheckboxes input[value="${cat}"]`).prop("checked", true);
+        });
+      }
+
+      $("#todas").on("change", function () {
+        const isChecked = $(this).is(":checked");
+        $("#categoriaCheckboxes input").prop("checked", isChecked);
+      });
+
+      $(".categoria-checkbox")
+        .not("#todas")
+        .on("change", function () {
+          const allChecked =
+            $(".categoria-checkbox").not("#todas").length ===
+            $(".categoria-checkbox:checked").not("#todas").length;
+          $("#todas").prop("checked", allChecked);
+        });
     },
     preConfirm: () => {
-      const categoria = $("#categoria").val();
-      localStorage.setItem("categoriaSelect", categoria);
-      categoriaSelect = categoria;
-      carregarCategorias();
+      const selectedCategorias = [];
+      const isTodasChecked = $("#todas").is(":checked");
+
+      if (isTodasChecked) {
+        selectedCategorias.push("todas");
+      } else {
+        $("#categoriaCheckboxes input:checked").each(function () {
+          selectedCategorias.push($(this).val());
+        });
+      }
+
+      if (selectedCategorias.length === 0) {
+        Swal.showValidationMessage("Selecione pelo menos uma categoria!");
+        return false;
+      }
+
+      localStorage.setItem(
+        "categoriasSelect",
+        JSON.stringify(selectedCategorias)
+      );
+      categoriaSelect = selectedCategorias;
+
+      if (userLog) {
+        db.ref(`jogadores/${userLog.uid}`).update({
+          categorias: categoriaSelect,
+        });
+      }
     },
   });
 });
+
+$btnTop10.on("click", showTop10Modal);
+
+function showTop10Modal() {
+  // Construir o HTML da tabela
+  const tableRows = top10List
+    .map((player, index) => {
+      const position = `${index + 1}º`;
+      const name = player?.nome || "-";
+      const score = player?.recorde || "-";
+      return `
+        <tr class="table-row">
+          <td>${position}</td>
+          <td>${name}</td>
+          <td>${score}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // Estrutura completa da tabela
+  const tableHTML = `
+    <table id="top10-table">
+      <thead>
+        <tr class="table-header">
+          <th>Posição</th>
+          <th>Nome</th>
+          <th>Recorde</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${
+          tableRows ||
+          "<tr><td colspan='3' style='text-align: center;'>Nenhum jogador encontrado</td></tr>"
+        }
+      </tbody>
+    </table>
+  `;
+
+  // Exibir o modal do SweetAlert
+  Swal.fire({
+    title: `<i class="fas fa-trophy"></i> Top 10 Jogadores`,
+    html: tableHTML,
+    confirmButtonText: `<i class="fas fa-times"></i> Fechar`,
+    customClass: {
+      confirmButton: "btn btn-primary",
+    },
+  });
+}
+
+// Função para buscar e ordenar o Top 10
+function updateLeaderboard() {
+  db.ref("jogadores").once("value", (snapshot) => {
+    const jogadores = snapshot.val();
+    top10List = Object.values(jogadores)
+      .sort((a, b) => b.recorde - a.recorde)
+      .slice(0, 10);
+  });
+}
+
+// Atualizar o Top 10 em tempo real
+db.ref("jogadores").on("value", updateLeaderboard);
 
 carregarCategorias();

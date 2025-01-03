@@ -11,8 +11,9 @@ function verificarAutenticacao() {
             const jogador = snapshot.val();
             userLogado = jogador;
             $("#usuarioLogado").text(jogador.nome);
-            $("#btnAuth").attr("title", "Sair");
-            $("#btnAuth").html(`<i class="fas fa-sign-out-alt"></i> `);
+            $("#btnLogin").attr("title", "Editar perfil");
+            $("#btnLogin").html('<i class="fas fa-user-edit"></i><span class="buttonText">Editar perfil</span>');
+            $("#btnLogout").css("display", "flex");
             $("#logado").css("display", "flex");
             $("#lembreteLogin").hide();
             db.ref(`jogadores/${user.uid}`)
@@ -22,6 +23,8 @@ function verificarAutenticacao() {
                   const jogador = snapshot.val();
                   pontuacao = jogador.pontuacao;
                   pontuacaoMax = jogador.recorde;
+                  categoriaSelect = jogador.categorias ? jogador.categorias : "todas";
+                  localStorage.setItem("categoriasSelect", JSON.stringify(categoriaSelect));
                 }
               });
           }
@@ -34,6 +37,11 @@ function verificarAutenticacao() {
     } else {
       pontuacao = parseInt(localStorage.getItem("pontuacao")) || 0;
       pontuacaoMax = localStorage.getItem("pontuacaoMax") || 0;
+      $("#btnLogin").attr("title", "Login");
+      $("#btnLogin").html('<i class="fas fa-user"></i><span class="buttonText">Entrar</span>');
+      $("#btnLogout").hide();
+      $("#logado").hide();
+      $("#lembreteLogin").show();
       $(".loading").fadeOut(500);
     }
   });
@@ -76,17 +84,19 @@ function registrarUsuario(email, senha, nomeJogador) {
     });
 }
 
-$("#btnAuth").on("click", function () {
+$btnLogin.on("click", function () {
   if (userLogado) {
-    logout();
+    editPlayer();
   } else {
     showmModalLoginRegister();
   }
 });
 
+$btnLogout.on("click", logout);
+
 function showmModalLoginRegister() {
   Swal.fire({
-    title: "Entrar",
+    title: `<i class="fas fa-user"></i> Entrar`,
     html: `
       <form>
         <div class="container-form">
@@ -101,9 +111,9 @@ function showmModalLoginRegister() {
         `,
     showCancelButton: true,
     showDenyButton: true,
-    confirmButtonText: "Entrar",
-    cancelButtonText: "Cancelar",
-    denyButtonText: "Registrar",
+    confirmButtonText: `<i class="fas fa-sign-in-alt"></i> Entrar`,
+    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
+    denyButtonText: `<i class="fas fa-user-plus"></i> Registrar`,
     showLoaderOnConfirm: true,
     customClass: {
       confirmButton: "btn btn-primary",
@@ -167,7 +177,7 @@ function showmModalLoginRegister() {
 
 function showModalRegister() {
   Swal.fire({
-    title: "Registrar",
+    title: `<i class="fas fa-user-plus"></i> Registrar`,
     html: `
       <form>
         <div class="container-form">
@@ -189,8 +199,8 @@ function showModalRegister() {
       </form>
       `,
     showCancelButton: true,
-    confirmButtonText: "Registrar",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: `<i class="fas fa-user-plus"></i> Registrar`,
+    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
     customClass: {
       confirmButton: "btn btn-primary",
       cancelButton: "btn btn-secondary",
@@ -231,14 +241,65 @@ function showModalRegister() {
   });
 }
 
+function editPlayer() {
+  Swal.fire({
+    title: `<i class="fas fa-user-edit"></i> Editar perfil`,
+    html: `
+      <form>
+        <div class="container-form">
+          <label class="form-label" for="nome">Apelido:</label>
+          <input type="text" name="nome" id="nomeEdit" class="swal2-input" placeholder="Digite seu nome" value="${userLogado.nome}" required>
+        </div>
+      </form>
+      `,
+    showCancelButton: true,
+    confirmButtonText: `<i class="fas fa-save"></i> Salvar`,
+    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
+    customClass: {
+      confirmButton: "btn btn-primary",
+      cancelButton: "btn btn-secondary",
+    },
+    preConfirm: () => {
+      const nomeJogador = $("#nomeEdit").val().trim();
+
+      if (!nomeJogador) {
+        Swal.showValidationMessage("Por favor, preencha o campo apelido!");
+        return false;
+      }
+
+      return { nomeJogador };
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const { nomeJogador } = result.value;
+      db.ref(`jogadores/${userLog.uid}`)
+        .update({ nome: nomeJogador })
+        .then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Sucesso",
+            text: "Informações atualizadas com sucesso!",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          }).then(() => {
+            location.reload();
+          });
+        });
+    }
+  });
+}
+
 function logout() {
   Swal.fire({
     title: "Sair",
     text: "Tem certeza que deseja sair?",
     icon: "question",
     showCancelButton: true,
-    confirmButtonText: "Sim",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: `<i class="fas fa-person-to-door"></i> Sim, sair`,
+    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
     customClass: {
       confirmButton: "btn btn-primary",
       cancelButton: "btn btn-secondary",

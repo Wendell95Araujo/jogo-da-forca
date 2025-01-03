@@ -6,12 +6,12 @@
     <meta name="description" content="Jogo da Forca">
     <meta name="authior" content="Wendell Araujo">
     <title>Jogo da Forca</title>
-    <link rel="shortcut icon" href="img/icon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="mg/icon.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik+Bubbles&family=Special+Elite&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/480d2553e7.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="ib/fontawesome-pro-6.5.2-web/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -20,24 +20,40 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </head>
 <body>
+    <div class="loading">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
     <div class="container">
+        <h1>Jogo da Forca</h1>
         <span id="logado">logado como: <strong id="usuarioLogado"></strong></span>
         <span id="lembreteLogin">Faça login para continuar jogando em qualquer dispositivo e ainda entrar na lista do top 10.</span>
         
-        <h1>Jogo da Forca</h1>
-
         <div class="container-buttons">
-            <button id="iniciarJogo">
+            <button id="iniciarJogo" title="Iniciar Jogo">
                 <i class="fa-solid fa-play"></i>
-                <span>Iniciar Jogo</span>
+                <span class="buttonText">Iniciar</span>
             </button>
-            <button id="reiniciarJogo">
+            <button id="reiniciarJogo" title="Reiniciar Jogo">
                 <i class="fa-solid fa-rotate-right"></i>
-                <span>Reiniciar Jogo</span>
+                <span class="buttonText">Reiniciar</span>
             </button>
-            <button id="configuracoes">
+            <button id="btnTop10" title="Top 10">
+                <i class="fas fa-trophy"></i>
+                <span class="buttonText">Top 10</span>
+            </button>
+            <button id="configuracoes" title="Configurações">
                 <i class="fa-solid fa-cog"></i>
-                <span>Configurações</span>
+                <span class="buttonText">Configurações</span>
+            </button>
+            <button id="btnLogin" class="btn btn-primary" title="Login">
+                <i class="fas fa-user"></i>
+                <span class="buttonText">Entrar</span>
+            </button>
+            <button id="btnLogout" class="btn btn-primary" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="buttonText">Sair</span>
             </button>
         </div>
 

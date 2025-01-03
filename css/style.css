@@ -99,6 +99,7 @@ body {
   align-items: center;
   margin: 10px auto;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Header */
@@ -231,6 +232,44 @@ h1 {
   transform: rotate(45deg);
 }
 
+/*Estilo da tabela top 10*/
+#top10-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  text-align: center;
+}
+
+#top10-table .table-header {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  font-weight: bold;
+}
+
+#top10-table .table-header th {
+  font-size: 20px;
+  line-height: 2;
+}
+
+#top10-table .table-row {
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--primary-color);
+}
+
+#top10-table .table-row td {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+#top10-table .table-row td:first-child {
+  font-weight: bold;
+  font-size: 18px ;
+}
+
+#top10-table .table-row:nth-child(even) {
+  background-color: #ccc;
+}
+
 /* Botões */
 button,
 .btn {
@@ -258,7 +297,7 @@ button:hover:not(:disabled),
   background-image: none !important;
 }
 
-#reiniciarJogo {
+#reiniciarJogo, #btnLogout {
   display: none;
 }
 
@@ -385,6 +424,10 @@ footer p {
   border-color: var(--primary-color) rgba(0, 0, 0, 0) var(--primary-color) rgba(0, 0, 0, 0);
 }
 
+.swal2-validation-message::before {
+  background-color: var(--primary-color) !important;
+}
+
 .swal2-icon {
   border-color: var(--primary-color) !important;
   color: var(--primary-color) !important;
@@ -458,6 +501,44 @@ footer p {
   border: 2px solid var(--primary-color);
 }
 
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary-color);
+}
+
+.categoria-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.categoria-checkbox:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--secondary-color);
+}
+
+.categoria-checkbox:checked::before {
+  content: "\2713";
+  color: var(--secondary-color);
+  font-size: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.form-check input:hover{
+  opacity: 0.8;
+}
+
 .btn-primary {
   background-color: var(--primary-color);
   color: var(--secondary-color);
@@ -473,6 +554,12 @@ footer p {
 }
 
 /* Responsividade */
+@media screen and (max-width: 700px) {
+  .buttonText {
+    display: none;
+  }
+}
+
 @media screen and (max-width: 576px) {
   .teclado-completo {
     display: flex;
