@@ -1,5 +1,3 @@
-const db = firebase.database();
-
 // Seletores jQuery
 const $iniciarJogoBtn = $("#iniciarJogo");
 const $reiniciarJogoBtn = $("#reiniciarJogo");

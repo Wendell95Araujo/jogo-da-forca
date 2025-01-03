@@ -15,10 +15,73 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  height: 100vh;
+  min-height: 100vh;
   background-color: var(--secondary-color);
+}
+
+/* Loading Animation */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--primary-color);
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin: 0 5px;
+  background-color: var(--secondary-color);
+  animation: loading 1s ease-in-out infinite;
+}
+
+.circle:nth-child(1) {
+  animation-delay: 0.4s;
+}
+
+.circle:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.circle:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes loading {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.5);
+    opacity: 0.2;
+  }
+}
+
+/*Auth*/
+#logado {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+#usuarioLogado {
+  color: var(--primary-color);
 }
 
 /* Container */
@@ -27,6 +90,7 @@ body {
   padding: 20px;
   border-radius: 10px;
   width: 100%;
+  flex: 1;
 }
 
 .container-buttons {
@@ -267,6 +331,34 @@ button:hover:not(:disabled),
   margin: 20px 0;
 }
 
+/* Footer */
+footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 20px 0;
+  text-align: center;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  gap: 10px;
+}
+
+footer a {
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  margin: 0 auto;
+}
+
+footer img {
+  height: 50px;
+}
+
+footer p {
+  font-size: 14px;
+}
+
 /*swal alert*/
 .swal2-container {
   width: 100% !important;
@@ -285,6 +377,54 @@ button:hover:not(:disabled),
   color: var(--primary-color);
 }
 
+.swal2-timer-progress-bar {
+  background-color: var(--primary-color) !important;
+}
+
+.swal2-loader {
+  border-color: var(--primary-color) rgba(0, 0, 0, 0) var(--primary-color) rgba(0, 0, 0, 0);
+}
+
+.swal2-icon {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+.swal2-icon-success {
+  border-color: var(--primary-color) !important;
+}
+
+.swal2-icon-success .swal2-success-line-tip,
+.swal2-icon-success .swal2-success-line-long {
+  background-color: var(--primary-color) !important;
+}
+
+.swal2-icon-success .swal2-success-ring {
+  border-color: var(--primary-color) !important;
+}
+
+.swal2-icon-error {
+  border-color: var(--primary-color) !important;
+}
+
+.swal2-icon-error .swal2-x-mark-line-left,
+.swal2-icon-error .swal2-x-mark-line-right {
+  background-color: var(--primary-color) !important;
+}
+
+.swal2-icon-warning {
+  border-color: var(--primary-color) !important;
+}
+
+.swal2-icon-warning .swal2-warning-body,
+.swal2-icon-warning .swal2-warning-dot {
+  background-color: var(--primary-color) !important;
+}
+
+.swal-icon--warning__dot {
+  background-color: var(--primary-color) !important;
+}
+
 .container-form {
   display: flex;
   flex-direction: column;
@@ -292,7 +432,8 @@ button:hover:not(:disabled),
   justify-content: center;
   width: 250px;
   margin: 0 auto;
-  gap: 20px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .form-label {
@@ -306,6 +447,15 @@ button:hover:not(:disabled),
   color: var(--primary-color);
   display: block;
   width: 100%;
+  font-weight: bold;
+  margin: 0 auto;
+}
+
+.swal2-input:focus,
+.swal2-input:focus-visible {
+  box-shadow: none;
+  outline: none;
+  border: 2px solid var(--primary-color);
 }
 
 .btn-primary {
