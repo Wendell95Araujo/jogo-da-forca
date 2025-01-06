@@ -40,6 +40,7 @@ let letrasclicadas = [];
 let top10List = [];
 let niveisList = [];
 let conquistasList = [];
+let lastAccess = sessionStorage.getItem("lastAccess") || null;
 
 // Função para carregar categorias do Firebase
 function carregarCategorias() {

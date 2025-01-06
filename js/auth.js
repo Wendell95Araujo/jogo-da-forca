@@ -51,6 +51,14 @@ function verificarAutenticacao() {
                 }
               }
           $(".loading").fadeOut(500);
+          if (!lastAccess) {
+            lastAccess = new Date().toISOString();
+            sessionStorage.setItem("lastAccess", lastAccess);
+            db.ref(`jogadores/${user.uid}`).update({
+              lastAccess: lastAccess
+            })
+            
+          }
         })
         .catch((error) => {
           console.error("Erro ao carregar os dados do jogador:", error);
