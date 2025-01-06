@@ -636,7 +636,7 @@ function exibirConquistasJogador(jogador) {
   }
 
   let conquistasHTML = '<div style="text-align: left;">';
-  let conquistasTrophHtml = "";
+  let conquistasTrophHtml = '<div class="conquista-item-container">';
   conquistasList.forEach((conquista) => {
     const conquistado = conquistasJogador[conquista.id];
     let cor = "#654321";
@@ -666,9 +666,7 @@ function exibirConquistasJogador(jogador) {
     }
 
     conquistasTrophHtml += `
-      <div style="margin: 10px 0; display: flex; align-items: center;" class="conquista-item ${
-        conquistado ? "conquistado" : ""
-      }">
+      <div class="conquista-item ${ conquistado ? "conquistado" : ""}">
         <i class="fas fa-trophy" style="color: ${cor}; opacity: ${opacity}; font-size: 20px; margin-right: 10px;"
         title="${conquista.nome} - ${status}"></i>
         <div>
@@ -677,30 +675,25 @@ function exibirConquistasJogador(jogador) {
           <span style="font-size: 14px;">${status}</span>
         </div>
       </div>`;
-  });
-
+    });
+    
+  conquistasTrophHtml += "</div>";
   conquistasHTML += `
     <p class="conquista-text">
-      <p style="text-align: center;" class="conquistado">${
-        levelMax ? "" : `Progresso para próximo nível:`
-      }</p></p>
+      <p style="text-align: center;" class="conquistado">${levelMax ? "" : `Progresso para próximo nível:`}</p></p>
       <div style="display: flex; align-items: center;">
-      <span style="font-size: 12px;" class="conquistado"><strong>Nível ${
-        jogador.nivel
-      }</strong></span>
+      <span style="font-size: 12px;" class="conquistado"><strong>Nível ${jogador.nivel }</strong></span>
         <div style="flex: 1; height: 10px; background-color: #ddd; border-radius: 5px; overflow: hidden; margin: 10px;">
           <div class="progress-bar-conquista" style="width: ${progresso}%; height: 100%;"></div>
         </div>
-        <span style="font-size: 12px;" class="${
-          levelMax ? "conquistado" : ""
-        }">${textoProximoNivel}</span>
+        <span style="font-size: 12px;" class="${ levelMax ? "conquistado" : ""}">${textoProximoNivel}</span>
       </div>
     </p>
     <p class="conquista-text"><strong>Pontuação Atual:</strong> ${jogador.pontuacao}</p>
     <p class="conquista-text"><strong>Total de erros:</strong> ${jogador.errosTotal}</p>
     <p class="conquista-text"><strong>Total de acertos:</strong> ${jogador.acertosTotal}</p>
     <p class="conquista-text"><strong>Maior pontuação alcançada:</strong> ${jogador.recorde}</p><br>
-    <p class="conquista-text"><strong>Conquistas:</strong> ${countConquistadas}/${countConquistas}</p>
+    <p class="conquista-text contador-conquistas"><strong>Conquistas:</strong> ${countConquistadas}/${countConquistas}</p>
   `;
 
   conquistasHTML += conquistasTrophHtml;

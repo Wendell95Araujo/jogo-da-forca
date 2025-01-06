@@ -2,7 +2,7 @@
   --primary-color: #654321;
   --secondary-color: #fff;
   --tertiary-color: #000;
-  --primary-color-light: #fdf5e6;
+  --primary-color-light: #fefcf3 ;
 }
 
 * {
@@ -592,8 +592,10 @@ footer p {
 }
 
 .conquista-item {
+  display: flex;
+  align-items: center;
   border-bottom: 1px solid var(--primary-color);
-  width: 100%;
+  padding: 5px;
 }
 
 .conquista-item:first-child {
@@ -610,6 +612,10 @@ footer p {
 
 .progress-bar-conquista {
   background: linear-gradient(to right, var(--primary-color), #d4a017, #e0cda9);
+}
+
+.contador-conquistas {
+  text-align: end;
 }
 
 /* Responsividade */
