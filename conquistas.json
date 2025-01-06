@@ -1,0 +1,138 @@
+{
+  "conquistas": {
+    "porAcertosConsecutivos": {
+      "focoBronze": {
+        "acertosNecessarios": 10,
+        "descricao": "Conquiste 10 acertos consecutivos",
+        "nome": "Foco Bronze"
+      },
+      "focoDiamante": {
+        "acertosNecessarios": 200,
+        "descricao": "Conquiste 200 acertos consecutivos",
+        "nome": "Foco Diamante"
+      },
+      "focoOuro": {
+        "acertosNecessarios": 50,
+        "descricao": "Conquiste 50 acertos consecutivos",
+        "nome": "Foco Ouro"
+      },
+      "focoPlatina": {
+        "acertosNecessarios": 100,
+        "descricao": "Conquiste 100 acertos consecutivos",
+        "nome": "Foco Platina"
+      },
+      "focoPrata": {
+        "acertosNecessarios": 25,
+        "descricao": "Conquiste 25 acertos consecutivos",
+        "nome": "Foco Prata"
+      }
+    },
+    "porAtingirNiveis": {
+      "aprendiz": {
+        "descricao": "Alcance o nível 3 no jogo",
+        "nivelNecessario": 3,
+        "nome": "Jogador Aprendiz"
+      },
+      "desbravador": {
+        "descricao": "Alcance o nível 5 no jogo",
+        "nivelNecessario": 5,
+        "nome": "Jogador Desbravador"
+      },
+      "elite": {
+        "descricao": "Alcance o nível 8 no jogo",
+        "nivelNecessario": 8,
+        "nome": "Jogador Elite"
+      },
+      "explorador": {
+        "descricao": "Alcance o nível 4 no jogo",
+        "nivelNecessario": 4,
+        "nome": "Jogador Explorador"
+      },
+      "iniciante": {
+        "descricao": "Alcance o nível 2 no jogo",
+        "nivelNecessario": 2,
+        "nome": "Jogador Iniciante"
+      },
+      "lendario": {
+        "descricao": "Alcance o nível 9 no jogo",
+        "nivelNecessario": 9,
+        "nome": "Jogador Lendário"
+      },
+      "mestre": {
+        "descricao": "Alcance o nível 7 no jogo",
+        "nivelNecessario": 7,
+        "nome": "Jogador Mestre"
+      },
+      "supremo": {
+        "descricao": "Alcance o nível 10 no jogo",
+        "nivelNecessario": 10,
+        "nome": "Jogador Supremo"
+      },
+      "veterano": {
+        "descricao": "Alcance o nível 6 no jogo",
+        "nivelNecessario": 6,
+        "nome": "Jogador Veterano"
+      }
+    },
+    "porConquistasConquistadas": {
+      "mestreConquistas": {
+        "descricao": "Conquiste todas as outras conquistas",
+        "nome": "Mestre das Conquistas"
+      }
+    },
+    "porTotalDeAcertos": {
+      "cacadorPrata": {
+        "acertosNecessarios": 150,
+        "descricao": "Alcance 150 acertos no total",
+        "nome": "Caçador Prata"
+      },
+      "exploradorBronze": {
+        "acertosNecessarios": 50,
+        "descricao": "Alcance 50 acertos no total",
+        "nome": "Explorador Bronze"
+      },
+      "guardiaoOuro": {
+        "acertosNecessarios": 300,
+        "descricao": "Alcance 300 acertos no total",
+        "nome": "Guardião Ouro"
+      },
+      "lendaDiamante": {
+        "acertosNecessarios": 1000,
+        "descricao": "Alcance 1000 acertos no total",
+        "nome": "Lenda Diamante"
+      },
+      "mestrePlatina": {
+        "acertosNecessarios": 500,
+        "descricao": "Alcance 500 acertos no total",
+        "nome": "Mestre Platina"
+      }
+    },
+    "porTotalDeErros": {
+      "forcaPlatina": {
+        "descricao": "Acumule 250 erros no total",
+        "errosNecessarios": 250,
+        "nome": "Força de Platina"
+      },
+      "invencivelDiamante": {
+        "descricao": "Acumule 500 erros no total",
+        "errosNecessarios": 500,
+        "nome": "Invencível como Diamante"
+      },
+      "perseverancaBronze": {
+        "descricao": "Acumule 10 erros no total",
+        "errosNecessarios": 10,
+        "nome": "Perseverança de Bronze"
+      },
+      "persistenciaOuro": {
+        "descricao": "Acumule 100 erros no total",
+        "errosNecessarios": 100,
+        "nome": "Persistência de Ouro"
+      },
+      "resilienciaPrata": {
+        "descricao": "Acumule 50 erros no total",
+        "errosNecessarios": 50,
+        "nome": "Resiliência de Prata"
+      }
+    }
+  }
+}

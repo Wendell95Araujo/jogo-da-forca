@@ -2,6 +2,7 @@
   --primary-color: #654321;
   --secondary-color: #fff;
   --tertiary-color: #000;
+  --primary-color-light: #fdf5e6;
 }
 
 * {
@@ -82,6 +83,16 @@ body {
 
 #usuarioLogado {
   color: var(--primary-color);
+}
+
+#esqueciSenha {
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#esqueciSenha:hover {
+  opacity: 0.8;
 }
 
 /* Container */
@@ -263,11 +274,12 @@ h1 {
 
 #top10-table .table-row td:first-child {
   font-weight: bold;
-  font-size: 18px ;
+  font-size: 24px;
+  vertical-align: middle;
 }
 
 #top10-table .table-row:nth-child(even) {
-  background-color: #ccc;
+  background-color: var(--primary-color-light);
 }
 
 /* Botões */
@@ -297,7 +309,8 @@ button:hover:not(:disabled),
   background-image: none !important;
 }
 
-#reiniciarJogo, #btnLogout {
+#reiniciarJogo,
+#btnLogout {
   display: none;
 }
 
@@ -384,10 +397,13 @@ footer {
 }
 
 footer a {
-  text-decoration: none;
   cursor: pointer;
-  display: flex;
   margin: 0 auto;
+  color: var(--secondary-color);
+}
+
+footer a:hover {
+  color: #ddd;
 }
 
 footer img {
@@ -421,11 +437,21 @@ footer p {
 }
 
 .swal2-loader {
-  border-color: var(--primary-color) rgba(0, 0, 0, 0) var(--primary-color) rgba(0, 0, 0, 0);
+  border-color: var(--primary-color) rgba(0, 0, 0, 0) var(--primary-color)
+    rgba(0, 0, 0, 0);
 }
 
 .swal2-validation-message::before {
   background-color: var(--primary-color) !important;
+}
+
+.swal2-close:hover {
+  color: var(--primary-color) !important;
+}
+
+.custom-icon-class {
+  color: var(--primary-color) !important;
+  border: none !important;
 }
 
 .swal2-icon {
@@ -535,7 +561,7 @@ footer p {
   transform: translate(-50%, -50%);
 }
 
-.form-check input:hover{
+.form-check input:hover {
   opacity: 0.8;
 }
 
@@ -551,6 +577,39 @@ footer p {
 .btn-secondary:hover {
   background-color: var(--secondary-color);
   color: var(--primary-color);
+}
+
+.conquista-text {
+  color: var(--primary-color);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.conquista-title {
+  color: var(--primary-color);
+  font-size: 24px;
+  text-align: center;
+}
+
+.conquista-item {
+  border-bottom: 1px solid var(--primary-color);
+  width: 100%;
+}
+
+.conquista-item:first-child {
+  border-top: 1px solid var(--primary-color);
+}
+
+.conquista-item:nth-child(even) {
+  background-color: var(--primary-color-light);
+}
+
+.conquistado {
+  color: var(--primary-color);
+}
+
+.progress-bar-conquista {
+  background: linear-gradient(to right, var(--primary-color), #d4a017, #e0cda9);
 }
 
 /* Responsividade */

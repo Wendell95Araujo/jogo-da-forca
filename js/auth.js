@@ -10,24 +10,46 @@ function verificarAutenticacao() {
           if (snapshot.exists()) {
             const jogador = snapshot.val();
             userLogado = jogador;
+            
+            pontuacao = jogador.pontuacao;
+            pontuacaoMax = jogador.recorde;
+            acertoParaAvancar = jogador.acertoParaAvancar;
+            acertosTotal = jogador.acertosTotal || 0;
+            errosTotal = jogador.errosTotal || 0;
+            nivelAtual = jogador.nivelAtual || 1;
+            conquistas = jogador.conquistas || {};
+            categoriaSelect = jogador.categorias 
+              ? jogador.categorias
+              : "todas";
+            localStorage.setItem(
+              "categoriasSelect",
+              JSON.stringify(categoriaSelect)
+            );
+
             $("#usuarioLogado").text(jogador.nome);
-            $("#btnLogin").attr("title", "Editar perfil");
-            $("#btnLogin").html('<i class="fas fa-user-edit"></i><span class="buttonText">Editar perfil</span>');
+            $("#btnLogin").hide();
             $("#btnLogout").css("display", "flex");
             $("#logado").css("display", "flex");
+            $("#btnTop10").css("display", "flex");
+            $("#btnConquistas").css("display", "flex");
             $("#lembreteLogin").hide();
-            db.ref(`jogadores/${user.uid}`)
-              .once("value")
-              .then((snapshot) => {
-                if (snapshot.exists()) {
-                  const jogador = snapshot.val();
-                  pontuacao = jogador.pontuacao;
-                  pontuacaoMax = jogador.recorde;
-                  categoriaSelect = jogador.categorias ? jogador.categorias : "todas";
-                  localStorage.setItem("categoriasSelect", JSON.stringify(categoriaSelect));
+
+             if (!user.displayName) {
+              user
+                .updateProfile({
+                   displayName: jogador.nome,
+                })
+                 .then(() => {
+                   console.log("Nome de exibição atualizado com sucesso!");
+                })
+                 .catch((error) => {
+                   console.error(
+                     "Erro ao atualizar o nome de exibição:",
+                      error
+                    );
+                  });
                 }
-              });
-          }
+              }
           $(".loading").fadeOut(500);
         })
         .catch((error) => {
@@ -37,8 +59,13 @@ function verificarAutenticacao() {
     } else {
       pontuacao = parseInt(localStorage.getItem("pontuacao")) || 0;
       pontuacaoMax = localStorage.getItem("pontuacaoMax") || 0;
-      $("#btnLogin").attr("title", "Login");
-      $("#btnLogin").html('<i class="fas fa-user"></i><span class="buttonText">Entrar</span>');
+      acertosTotal = localStorage.getItem("acertosTotal") || 0;
+      errosTotal = localStorage.getItem("errosTotal") || 0;
+      nivelAtual = localStorage.getItem("nivelAtual") || 1;
+      conquistas = JSON.parse(localStorage.getItem("conquistas")) || {};
+      $("#btnConquistas").hide();
+      $("#btnTop10").hide();
+      $("#btnLogin").css("display", "flex");
       $("#btnLogout").hide();
       $("#logado").hide();
       $("#lembreteLogin").show();
@@ -58,9 +85,15 @@ function registrarUsuario(email, senha, nomeJogador) {
         nome: nomeJogador,
         pontuacao: 0,
         recorde: 0,
+        nivel: 1,
+        errosTotal: 0,
+        acertosTotal: 0,
+        categorias: "todas"
       });
 
       Swal.fire({
+        toast: true,
+        position: "center",
         icon: "success",
         title: "Conta criada com sucesso!",
         text: `Bem-vindo, ${nomeJogador}!`,
@@ -85,11 +118,7 @@ function registrarUsuario(email, senha, nomeJogador) {
 }
 
 $btnLogin.on("click", function () {
-  if (userLogado) {
-    editPlayer();
-  } else {
     showmModalLoginRegister();
-  }
 });
 
 $btnLogout.on("click", logout);
@@ -107,18 +136,22 @@ function showmModalLoginRegister() {
             <label class="form-label" for="senha">Senha:</label>
             <input type="password" name="senha" id="senhaLogin" class="swal2-input" placeholder="Digite sua senha" required autocomplete="current-password">
         </div>
+        <div class="container-form">
+            <span id="esqueciSenha">Esqueci minha senha</span>
+        </div>
       </form>
         `,
-    showCancelButton: true,
+    showCloseButton: true,
     showDenyButton: true,
     confirmButtonText: `<i class="fas fa-sign-in-alt"></i> Entrar`,
-    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
     denyButtonText: `<i class="fas fa-user-plus"></i> Registrar`,
     showLoaderOnConfirm: true,
     customClass: {
       confirmButton: "btn btn-primary",
-      cancelButton: "btn btn-secondary",
-      denyButton: "btn btn-primary",
+      denyButton: "btn btn-secondary",
+    },
+    didOpen: () => {
+      $("#esqueciSenha").on("click", forgotPassword);
     },
     preConfirm: () => {
       const email = $("#emailLogin").val().trim();
@@ -139,11 +172,12 @@ function showmModalLoginRegister() {
         .then((userCredential) => {
           userLogado = userCredential.user;
           Swal.fire({
+            toast: true,
+            position: "center",
             icon: "success",
             title: "Login efetuado com sucesso!",
             timer: 2000,
             timerProgressBar: true,
-            allowOutsideClick: false,
             showConfirmButton: false,
           }).then(() => {
             verificarAutenticacao();
@@ -198,12 +232,10 @@ function showModalRegister() {
         </div>
       </form>
       `,
-    showCancelButton: true,
+    showCloseButton: true,
     confirmButtonText: `<i class="fas fa-user-plus"></i> Registrar`,
-    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
     customClass: {
       confirmButton: "btn btn-primary",
-      cancelButton: "btn btn-secondary",
     },
     preConfirm: () => {
       const email = $("#emailCadastro").val().trim();
@@ -241,57 +273,6 @@ function showModalRegister() {
   });
 }
 
-function editPlayer() {
-  Swal.fire({
-    title: `<i class="fas fa-user-edit"></i> Editar perfil`,
-    html: `
-      <form>
-        <div class="container-form">
-          <label class="form-label" for="nome">Apelido:</label>
-          <input type="text" name="nome" id="nomeEdit" class="swal2-input" placeholder="Digite seu nome" value="${userLogado.nome}" required>
-        </div>
-      </form>
-      `,
-    showCancelButton: true,
-    confirmButtonText: `<i class="fas fa-save"></i> Salvar`,
-    cancelButtonText: `<i class="fas fa-times"></i> Cancelar`,
-    customClass: {
-      confirmButton: "btn btn-primary",
-      cancelButton: "btn btn-secondary",
-    },
-    preConfirm: () => {
-      const nomeJogador = $("#nomeEdit").val().trim();
-
-      if (!nomeJogador) {
-        Swal.showValidationMessage("Por favor, preencha o campo apelido!");
-        return false;
-      }
-
-      return { nomeJogador };
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const { nomeJogador } = result.value;
-      db.ref(`jogadores/${userLog.uid}`)
-        .update({ nome: nomeJogador })
-        .then(() => {
-          Swal.fire({
-            icon: "success",
-            title: "Sucesso",
-            text: "Informações atualizadas com sucesso!",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          }).then(() => {
-            location.reload();
-          });
-        });
-    }
-  });
-}
-
 function logout() {
   Swal.fire({
     title: "Sair",
@@ -313,18 +294,70 @@ function logout() {
             <span>Entrar</span>`
         );
         $("#logado").css("display", "none");
+        localStorage.clear();
         Swal.fire({
+          toast: true,
+          position: "center",
           icon: "success",
           title: "Saida efetuada com sucesso!",
           showConfirmButton: false,
           timer: 2000,
           timerProgressBar: true,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
         });
       });
     }
   });
+}
+
+function forgotPassword() {
+  swal
+    .fire({
+      title: "<i class='fas fa-key'></i> Recuperar senha",
+      html: `
+        <form>
+          <div class="container-form">
+            <label class="form-label" for="email">Email:</label>
+            <input type="email" name="email" id="emailRecuperar" class="swal2-input" placeholder="Digite seu email" required autocomplete="username">
+          </div>
+        </form>
+        `,
+      showCloseButton: true,
+      confirmButtonText: `<i class="fas fa-key"></i> Recuperar senha`,
+      customClass: {
+        confirmButton: "btn btn-primary",
+      },
+      preConfirm: () => {
+        const email = $("#emailRecuperar").val().trim();
+        if (!email) {
+          Swal.showValidationMessage("Por favor, preencha o campo email!");
+          return false;
+        }
+
+        if (!emailPattern.test(email)) {
+          Swal.showValidationMessage("Por favor, digite um email válido!");
+          return false;
+        }
+
+        return { email };
+      },
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        const { email } = result.value;
+        auth.sendPasswordResetEmail(email).then(() => {
+          Swal.fire({
+            toast: true,
+            position: "center",
+            icon: "success",
+            title:
+              "Um link de redefinição de senha foi enviado para o seu email. Se não tiver recebido, verifique sua caixa de spam.",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+          });
+        });
+      }
+    });
 }
 
 verificarAutenticacao();
