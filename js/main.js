@@ -639,23 +639,24 @@ function exibirConquistasJogador(jogador) {
   let conquistasTrophHtml = '<div class="conquista-item-container">';
   conquistasList.forEach((conquista) => {
     const conquistado = conquistasJogador[conquista.id];
-    let cor = "#654321";
-    let opacity = 0.1;
+    let cor = "#fefcf3";
+    let opacity = 0.5;
     let status = "Ainda não conquistado";
 
     if (conquistado) {
       opacity = 1;
+      cor = "#654321";
       if (conquista.id === "mestreConquistas") {
         cor = "#5f4b8b";
-      } else if (conquista.id.includes("Bronze")) {
+      } else if (conquista.id.includes("Bronze") || conquista.id === "veterano") {
         cor = "#cd7f32";
-      } else if (conquista.id.includes("Prata")) {
+      } else if (conquista.id.includes("Prata") || conquista.id === "mestre") {
         cor = "#c0c0c0";
-      } else if (conquista.id.includes("Ouro")) {
+      } else if (conquista.id.includes("Ouro") || conquista.id === "elite") {
         cor = "#ffd700";
-      } else if (conquista.id.includes("Platina")) {
+      } else if (conquista.id.includes("Platina") || conquista.id === "lendario") {
         cor = "#e5e4e2";
-      } else if (conquista.id.includes("Diamante")) {
+      } else if (conquista.id.includes("Diamante") || conquista.id === "supremo") {
         cor = "#b9f2ff";
       }
 
@@ -667,9 +668,9 @@ function exibirConquistasJogador(jogador) {
 
     conquistasTrophHtml += `
       <div class="conquista-item ${ conquistado ? "conquistado" : ""}">
-        <i class="fas fa-trophy" style="color: ${cor}; opacity: ${opacity}; font-size: 20px; margin-right: 10px;"
+        <i class="fas fa-trophy" style="color: ${cor}; font-size: 20px; margin-right: 10px;"
         title="${conquista.nome} - ${status}"></i>
-        <div>
+        <div style="opacity: ${opacity};">
           <strong>${conquista.nome}</strong><br>
           <span style="font-size: 12px;">${conquista.descricao}</span><br>
           <span style="font-size: 14px;">${status}</span>
