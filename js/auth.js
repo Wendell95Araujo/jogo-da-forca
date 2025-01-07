@@ -1,4 +1,7 @@
+// Variáveis globais
 const emailPattern = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+
+// Função validar usuário autenticado
 function verificarAutenticacao() {
   auth.onAuthStateChanged((user) => {
     if (user) {
@@ -10,7 +13,7 @@ function verificarAutenticacao() {
           if (snapshot.exists()) {
             const jogador = snapshot.val();
             userLogado = jogador;
-            
+
             pontuacao = jogador.pontuacao;
             pontuacaoMax = jogador.recorde;
             acertoParaAvancar = jogador.acertoParaAvancar;
@@ -18,9 +21,7 @@ function verificarAutenticacao() {
             errosTotal = jogador.errosTotal || 0;
             nivelAtual = jogador.nivelAtual || 1;
             conquistas = jogador.conquistas || {};
-            categoriaSelect = jogador.categorias 
-              ? jogador.categorias
-              : "todas";
+            categoriaSelect = jogador.categorias ? jogador.categorias : "todas";
             localStorage.setItem(
               "categoriasSelect",
               JSON.stringify(categoriaSelect)
@@ -34,30 +35,37 @@ function verificarAutenticacao() {
             $("#btnConquistas").css("display", "flex");
             $("#lembreteLogin").hide();
 
-             if (!user.displayName) {
+            if (!user.displayName) {
               user
                 .updateProfile({
-                   displayName: jogador.nome,
+                  displayName: jogador.nome,
                 })
-                 .then(() => {
-                   console.log("Nome de exibição atualizado com sucesso!");
+                .then(() => {
+                  console.log("Nome de exibição atualizado com sucesso!");
                 })
-                 .catch((error) => {
-                   console.error(
-                     "Erro ao atualizar o nome de exibição:",
-                      error
-                    );
-                  });
-                }
-              }
+                .catch((error) => {
+                  console.error("Erro ao atualizar o nome de exibição:", error);
+                });
+            }
+          }
           $(".loading").fadeOut(500);
+
+          updateLeaderboard();
+          carregarConquistas();
+
+          // Atualizar o Top 10 em tempo real
+          db.ref("jogadores").on("child_changed", (snapshot) => {
+            const jogadorAtualizado = snapshot.val();
+            if (jogadorAtualizado.recorde) {
+              updateLeaderboard();
+            }
+          });
           if (!lastAccess) {
             lastAccess = new Date().toISOString();
             sessionStorage.setItem("lastAccess", lastAccess);
             db.ref(`jogadores/${user.uid}`).update({
-              lastAccess: lastAccess
-            })
-            
+              lastAccess: lastAccess,
+            });
           }
         })
         .catch((error) => {
@@ -67,10 +75,6 @@ function verificarAutenticacao() {
     } else {
       pontuacao = parseInt(localStorage.getItem("pontuacao")) || 0;
       pontuacaoMax = localStorage.getItem("pontuacaoMax") || 0;
-      acertosTotal = localStorage.getItem("acertosTotal") || 0;
-      errosTotal = localStorage.getItem("errosTotal") || 0;
-      nivelAtual = localStorage.getItem("nivelAtual") || 1;
-      conquistas = JSON.parse(localStorage.getItem("conquistas")) || {};
       $("#btnConquistas").hide();
       $("#btnTop10").hide();
       $("#btnLogin").css("display", "flex");
@@ -82,56 +86,10 @@ function verificarAutenticacao() {
   });
 }
 
-function registrarUsuario(email, senha, nomeJogador) {
-  auth
-    .createUserWithEmailAndPassword(email, senha)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      const uid = user.uid;
-      const userRef = db.ref(`jogadores/${uid}`);
-      userRef.set({
-        nome: nomeJogador,
-        pontuacao: 0,
-        recorde: 0,
-        nivel: 1,
-        errosTotal: 0,
-        acertosTotal: 0,
-        categorias: "todas"
-      });
+// Função exibir modal Login
+$btnLogin.on("click", showmModalLogin);
 
-      Swal.fire({
-        toast: true,
-        position: "center",
-        icon: "success",
-        title: "Conta criada com sucesso!",
-        text: `Bem-vindo, ${nomeJogador}!`,
-        confirmButtonText: "OK",
-        customClass: {
-          confirmButton: "btn btn-primary",
-        },
-      });
-      verificarAutenticacao();
-    })
-    .catch((error) => {
-      Swal.fire({
-        icon: "error",
-        title: "Erro ao criar conta",
-        text: error.message,
-        confirmButtonText: "OK",
-        customClass: {
-          confirmButton: "btn btn-primary",
-        },
-      });
-    });
-}
-
-$btnLogin.on("click", function () {
-    showmModalLoginRegister();
-});
-
-$btnLogout.on("click", logout);
-
-function showmModalLoginRegister() {
+function showmModalLogin() {
   Swal.fire({
     title: `<i class="fas fa-user"></i> Entrar`,
     html: `
@@ -159,6 +117,14 @@ function showmModalLoginRegister() {
       denyButton: "btn btn-secondary",
     },
     didOpen: () => {
+      const swalModal = Swal.getPopup();
+      swalModal.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          Swal.clickConfirm();
+        }
+      });
+
       $("#esqueciSenha").on("click", forgotPassword);
     },
     preConfirm: () => {
@@ -177,8 +143,7 @@ function showmModalLoginRegister() {
 
       return auth
         .signInWithEmailAndPassword(email, senha)
-        .then((userCredential) => {
-          userLogado = userCredential.user;
+        .then(() => {
           Swal.fire({
             toast: true,
             position: "center",
@@ -217,6 +182,7 @@ function showmModalLoginRegister() {
   });
 }
 
+// Função exibir modal Register
 function showModalRegister() {
   Swal.fire({
     title: `<i class="fas fa-user-plus"></i> Registrar`,
@@ -241,9 +207,21 @@ function showModalRegister() {
       </form>
       `,
     showCloseButton: true,
+    showDenyButton: true,
     confirmButtonText: `<i class="fas fa-user-plus"></i> Registrar`,
+    denyButtonText: `<i class="fas fa-sign-in-alt"></i> Entrar`,
     customClass: {
       confirmButton: "btn btn-primary",
+      denyButton: "btn btn-secondary",
+    },
+    didOpen: () => {
+      const swalModal = Swal.getPopup();
+      swalModal.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          Swal.clickConfirm();
+        }
+      });
     },
     preConfirm: () => {
       const email = $("#emailCadastro").val().trim();
@@ -271,15 +249,89 @@ function showModalRegister() {
         return false;
       }
 
-      return { email, senha, nomeJogador };
+      return db
+        .ref("jogadores")
+        .orderByChild("nome")
+        .equalTo(nomeJogador)
+        .once("value")
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            Swal.showValidationMessage(
+              "Esse apelido já está em usado. Por favor, escolha outro!"
+            );
+            return false;
+          }
+
+          return auth
+            .createUserWithEmailAndPassword(email, senha)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              const uid = user.uid;
+              const userRef = db.ref(`jogadores/${uid}`);
+              userRef.set({
+                nome: nomeJogador,
+                pontuacao: 0,
+                recorde: 0,
+                nivel: 1,
+                errosTotal: 0,
+                acertosTotal: 0,
+                categorias: ["todas"],
+              });
+
+              Swal.fire({
+                toast: true,
+                position: "center",
+                icon: "success",
+                title: "Conta criada com sucesso!",
+                text: `Bem-vindo, ${nomeJogador}!`,
+                confirmButtonText: "OK",
+                customClass: {
+                  confirmButton: "btn btn-primary",
+                },
+              });
+              verificarAutenticacao();
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+
+              if (errorCode === "auth/email-already-in-use") {
+                Swal.showValidationMessage(
+                  "O e-mail já está sendo usado por outra conta."
+                );
+              } else if (errorCode === "auth/invalid-email") {
+                Swal.showValidationMessage(
+                  "Email inválido. Verifique e tente novamente."
+                );
+              } else if (errorCode === "auth/weak-password") {
+                Swal.showValidationMessage(
+                  "A senha é muito fraca. Use pelo menos 6 caracteres."
+                );
+              } else {
+                console.error("Erro inesperado:", error.message);
+                Swal.showValidationMessage(
+                  "Ocorreu um erro inesperado. Tente novamente."
+                );
+              }
+              return false;
+            });
+        })
+        .catch((error) => {
+          console.error(error);
+          Swal.showValidationMessage(
+            "Ocorreu um erro inesperado. Tente novamente."
+          );
+          return false;
+        });
     },
   }).then((result) => {
-    if (result.isConfirmed) {
-      const { email, senha, nomeJogador } = result.value;
-      registrarUsuario(email, senha, nomeJogador);
+    if (result.isDenied) {
+      showmModalLogin();
     }
   });
 }
+
+// Função exibir modal logout
+$btnLogout.on("click", logout);
 
 function logout() {
   Swal.fire({
@@ -317,6 +369,7 @@ function logout() {
   });
 }
 
+// Função esqueci senha
 function forgotPassword() {
   swal
     .fire({
@@ -368,4 +421,5 @@ function forgotPassword() {
     });
 }
 
+// Chamadas funções ao carregar arquivo
 verificarAutenticacao();

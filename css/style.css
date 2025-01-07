@@ -2,7 +2,7 @@
   --primary-color: #654321;
   --secondary-color: #fff;
   --tertiary-color: #000;
-  --primary-color-light: #fefcf3 ;
+  --primary-color-light: #fefcf3;
 }
 
 * {
@@ -282,6 +282,26 @@ h1 {
   background-color: var(--primary-color-light);
 }
 
+#top10-table .table-row.highlight {
+  background-color: #ffd700;
+  font-weight: bold;
+}
+
+#top10-table .table-row.highlight-first {
+  background-color: #ffe699;
+  font-weight: bold;
+}
+
+#top10-table .table-row.highlight-second {
+  background-color: #d6eaf8;
+  font-weight: bold;
+}
+
+#top10-table .table-row.highlight-third {
+  background-color: #f5d6ba;
+  font-weight: bold;
+}
+
 /* Botões */
 button,
 .btn {
@@ -336,6 +356,7 @@ button:hover:not(:disabled),
   cursor: pointer;
   width: 40px;
   height: 40px;
+  background-color: var(--secondary-color);
   border: 1px solid var(--primary-color);
   font-weight: 900;
 }
@@ -618,6 +639,27 @@ footer p {
   text-align: end;
 }
 
+/* Estilo Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary-color-light);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+  border: 2px solid var(--primary-color-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
 /* Responsividade */
 @media screen and (max-width: 700px) {
   .buttonText {
@@ -643,5 +685,12 @@ footer p {
   #teclado button {
     width: 30px;
     height: 30px;
+  }
+}
+
+/* Estilos para modo escuro */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--secondary-color);
   }
 }

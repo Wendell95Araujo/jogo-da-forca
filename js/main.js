@@ -42,21 +42,9 @@ let niveisList = [];
 let conquistasList = [];
 let lastAccess = sessionStorage.getItem("lastAccess") || null;
 
-// Função para carregar categorias do Firebase
-function carregarCategorias() {
-  const categoriasRef = db.ref("palavras");
-  categoriasRef.once("value").then((snapshot) => {
-    if (snapshot.exists()) {
-      const categorias = snapshot.val();
-      categoriasList = [];
-      $.each(categorias, (categoria, palavras) => {
-        categoriasList.push(categoria);
-      });
-    }
-  });
-}
+// Função iniciar o jogo
+$iniciarJogoBtn.on("click", iniciarJogo);
 
-// Função para iniciar o jogo
 function iniciarJogo() {
   letrasclicadas = [];
   $pontuacoesDiv.css("display", "flex");
@@ -125,6 +113,7 @@ function iniciarJogo() {
     });
 }
 
+// Função para exibir palavra na tela
 function mostrarPalavra() {
   const palavraFormatada = Array.from(palavraAtual)
     .map((letra) => {
@@ -137,6 +126,7 @@ function mostrarPalavra() {
   $palavraDiv.text(palavraFormatada);
 }
 
+// Função para verifica letra selecionada
 function verificarLetra(letra) {
   if (!letra) return;
   if (letrasclicadas.includes(letra)) return;
@@ -160,6 +150,29 @@ function verificarLetra(letra) {
     $palavraDiv.text(letrasExibidas.join(""));
 
     if (!letrasExibidas.includes("_")) {
+      pontuacao++;
+      acertosTotal++;
+      acertoParaAvancar++;
+      localStorage.setItem("pontuacao", pontuacao);
+      if (pontuacao > pontuacaoMax) {
+        pontuacaoMax = pontuacao;
+        localStorage.setItem("pontuacaoMax", pontuacaoMax);
+        $record.text(`Recorde: ${pontuacaoMax}`);
+      }
+      $pontuacao.text(`Pontuação: ${pontuacao}`);
+      if (userLog) {
+        db.ref(`jogadores/${userLog.uid}`).update({
+          recorde: pontuacaoMax,
+          pontuacao: pontuacao,
+          acertosTotal: acertosTotal,
+          acertoParaAvancar: acertoParaAvancar,
+        });
+
+        userLogado.recorde = pontuacaoMax;
+        userLogado.pontuacao = pontuacao;
+        userLogado.acertosTotal = acertosTotal;
+        userLogado.acertoParaAvancar = acertoParaAvancar;
+      }
       Swal.fire({
         toast: true,
         position: "center",
@@ -172,30 +185,7 @@ function verificarLetra(letra) {
         title: `<i class="fa-solid fa-check"></i> Parabéns, você acertou a palavra!`,
       }).then((result) => {
         if (!result.isConfirmed) return;
-        pontuacao++;
-        acertosTotal++;
-        acertoParaAvancar++;
-        localStorage.setItem("pontuacao", pontuacao);
-        localStorage.setItem("acertosTotal", acertosTotal);
-        if (pontuacao > pontuacaoMax) {
-          pontuacaoMax = pontuacao;
-          localStorage.setItem("pontuacaoMax", pontuacaoMax);
-          $record.text(`Recorde: ${pontuacaoMax}`);
-        }
-        $pontuacao.text(`Pontuação: ${pontuacao}`);
         if (userLog) {
-          db.ref(`jogadores/${userLog.uid}`).update({
-            recorde: pontuacaoMax,
-            pontuacao: pontuacao,
-            acertosTotal: acertosTotal,
-            acertoParaAvancar: acertoParaAvancar,
-          });
-
-          userLogado.recorde = pontuacaoMax;
-          userLogado.pontuacao = pontuacao;
-          userLogado.acertosTotal = acertosTotal;
-          userLogado.acertoParaAvancar = acertoParaAvancar;
-
           verificarConquistasJogador(userLogado);
         }
         iniciarJogo();
@@ -209,8 +199,6 @@ function verificarLetra(letra) {
     } else {
       pontuacao = 0;
       errosTotal++;
-      localStorage.setItem("pontuacao", pontuacao);
-      localStorage.setItem("errosTotal", errosTotal);
       if (userLog) {
         db.ref(`jogadores/${userLog.uid}`).update({
           pontuacao: pontuacao,
@@ -219,8 +207,6 @@ function verificarLetra(letra) {
 
         userLogado.pontuacao = pontuacao;
         userLogado.errosTotal = errosTotal;
-
-        verificarConquistasJogador(userLogado);
       }
       swal
         .fire({
@@ -237,6 +223,9 @@ function verificarLetra(letra) {
         })
         .then((result) => {
           if (!result.isConfirmed) return;
+          if (userLog) {
+            verificarConquistasJogador(userLogado);
+          }
           iniciarJogo();
         });
     }
@@ -254,7 +243,7 @@ function normalizarString(str) {
     .toUpperCase();
 }
 
-// Função para criar o teclado
+// Função para criar o teclado e eventos de click teclado físico
 function criarTeclado() {
   $tecladoDiv.empty();
 
@@ -292,15 +281,14 @@ function criarTeclado() {
   });
 }
 
-// Evento de clique para iniciar o jogo
-$iniciarJogoBtn.on("click", iniciarJogo);
+// Função reiniciar o jogo
+$reiniciarJogoBtn.on("click", reiniciarJogo);
 
-// Evento de clique para reiniciar o jogo
-$reiniciarJogoBtn.on("click", () => {
+function reiniciarJogo() {
   if (pontuacao === 0) {
     iniciarJogo();
   } else {
-    swal
+    return swal
       .fire({
         toast: true,
         position: "center",
@@ -319,16 +307,26 @@ $reiniciarJogoBtn.on("click", () => {
         }. Tem certeza que deseja reiniciar o jogo? Você perderá essa pontuação.`,
       })
       .then((result) => {
-        if (!result.isConfirmed) return;
-        pontuacao = 0;
-        localStorage.setItem("pontuacao", pontuacao);
-        iniciarJogo();
+        if (result.isConfirmed) {
+          pontuacao = 0;
+          errosTotal++;
+          localStorage.setItem("pontuacao", pontuacao);
+          if (userLog) {
+            db.ref(`jogadores/${userLog.uid}`).update({
+              pontuacao: 0,
+              errosTotal: errosTotal,
+            });
+          }
+          iniciarJogo();
+        }
       });
   }
-});
+}
 
-// Evento de clique alterar configurações
-$configButton.on("click", () => {
+// Função alterar configurações
+$configButton.on("click", configGame);
+
+function configGame() {
   let showEditPlayer = false;
   if (userLogado) showEditPlayer = true;
   swal
@@ -430,29 +428,40 @@ $configButton.on("click", () => {
         editPlayer();
       }
     });
-});
+}
 
+// Funçao exibir modal top10
 $btnTop10.on("click", showTop10Modal);
-
 function showTop10Modal() {
-  // Construir o HTML da tabela
   const tableRows = top10List
     .map((player, index) => {
-      const position = index + 1;
+      const position = player?.posicao || "-";
       const name = player?.nome || "-";
-      const score = player?.recorde || "-";
+      const score = player?.recorde || 0;
+      const uid = player?.uid || "-";
 
+      const isCurrentUser = uid === userLog.uid;
+
+      let highlightClass = "";
       let positionHTML = `${position}º`;
+
+      if (isCurrentUser) {
+        highlightClass = "highlight";
+      }
+
       if (position === 1) {
         positionHTML = `<i class="fas fa-medal" style="color: #ffd700;" title="1º Lugar"></i>`;
+        if (isCurrentUser) highlightClass = "highlight-first";
       } else if (position === 2) {
         positionHTML = `<i class="fas fa-medal" style="color: #c0c0c0;" title="2º Lugar"></i>`;
+        if (isCurrentUser) highlightClass = "highlight-second";
       } else if (position === 3) {
         positionHTML = `<i class="fas fa-medal" style="color: #cd7f32;" title="3º Lugar"></i>`;
+        if (isCurrentUser) highlightClass = "highlight-third";
       }
 
       return `
-        <tr class="table-row">
+        <tr class="table-row ${highlightClass}">
           <td>${positionHTML}</td>
           <td>${name}</td>
           <td>${score}</td>
@@ -487,7 +496,21 @@ function showTop10Modal() {
   });
 }
 
-// Função para verificar conquistas do jogador
+// Função para carregar categorias do Firebase
+function carregarCategorias() {
+  const categoriasRef = db.ref("palavras");
+  categoriasRef.once("value").then((snapshot) => {
+    if (snapshot.exists()) {
+      const categorias = snapshot.val();
+      categoriasList = [];
+      $.each(categorias, (categoria, palavras) => {
+        categoriasList.push(categoria);
+      });
+    }
+  });
+}
+
+// Função para verificar conquistas e mudanças de nível do jogador
 function verificarConquistasJogador(jogador) {
   const acertosTotais = jogador.acertosTotal || 0;
   const acertosParaAvancar = jogador.acertoParaAvancar || 0;
@@ -498,8 +521,37 @@ function verificarConquistasJogador(jogador) {
   let novoNivel = nivelAtual;
   let conquistasParaExibir = [];
   let countConquistas = conquistasList.length - 1;
+  let conquistasBronze = 0;
+  let conquistasPrata = 0;
+  let conquistasOuro = 0;
+  let conquistasPlatina = 0;
+  let conquistasDiamante = 0;
+
+  let conquistadasBronze = 0;
+  let conquistadasPrata = 0;
+  let conquistadasOuro = 0;
+  let conquistadasPlatina = 0;
+  let conquistadasDiamante = 0;
+
   let countConquistadas = Object.keys(conquistasObtidas).length;
 
+  Object.keys(conquistasObtidas).forEach((idConquista) => {
+    if (idConquista.includes("Bronze")) conquistadasBronze++;
+    if (idConquista.includes("Prata")) conquistadasPrata++;
+    if (idConquista.includes("Ouro")) conquistadasOuro++;
+    if (idConquista.includes("Platina")) conquistadasPlatina++;
+    if (idConquista.includes("Diamante")) conquistadasDiamante++;
+  });
+
+  conquistasList.forEach((conquista) => {
+    if (conquista.categoria !== "porConquistasConquistadas") {
+      if (conquista.id.includes("Bronze")) conquistasBronze++;
+      if (conquista.id.includes("Prata")) conquistasPrata++;
+      if (conquista.id.includes("Ouro")) conquistasOuro++;
+      if (conquista.id.includes("Platina")) conquistasPlatina++;
+      if (conquista.id.includes("Diamante")) conquistasDiamante++;
+    }
+  });
 
   // Verificar se o jogador avançou de nível
   niveisList.forEach((nivel) => {
@@ -524,43 +576,73 @@ function verificarConquistasJogador(jogador) {
     });
   }
 
+  const nivelExibicao = nivelAtual > novoNivel ? nivelAtual : novoNivel;
+
   // Verificar conquistas
   conquistasList.forEach((conquista) => {
     if (!conquistasObtidas[conquista.id]) {
       let conquistada = false;
-
+  
       if (
         conquista.categoria === "porTotalDeAcertos" &&
         acertosTotais >= conquista.acertosNecessarios
       ) {
         conquistada = true;
-        countConquistadas++;
       } else if (
         conquista.categoria === "porAcertosConsecutivos" &&
         acertosConsecutivos >= conquista.acertosNecessarios
       ) {
         conquistada = true;
-        countConquistadas++;
       } else if (
         conquista.categoria === "porTotalDeErros" &&
         errosTotais >= conquista.errosNecessarios
       ) {
         conquistada = true;
-        countConquistadas++;
       } else if (
         conquista.categoria === "porAtingirNiveis" &&
-        nivelAtual >= conquista.nivelNecessario
+        nivelExibicao >= conquista.nivelNecessario
       ) {
         conquistada = true;
-        countConquistadas++;
-      } else if (
-        conquista.categoria === "porConquistasConquistadas" &&
-        countConquistas === countConquistadas
-      ) {
-        conquistada = true;
+      } else if (conquista.categoria === "porConquistasConquistadas") {
+        if (
+          conquista.id.includes("Bronze") &&
+          conquistadasBronze >= conquistasBronze
+        ) {
+          conquistada = true;
+        } else if (
+          conquista.id.includes("Prata") &&
+          conquistadasPrata >= conquistasPrata
+        ) {
+          conquistada = true;
+        } else if (
+          conquista.id.includes("Ouro") &&
+          conquistadasOuro >= conquistasOuro
+        ) {
+          conquistada = true;
+        } else if (
+          conquista.id.includes("Platina") &&
+          conquistadasPlatina >= conquistasPlatina
+        ) {
+          conquistada = true;
+        } else if (
+          conquista.id.includes("Diamante") &&
+          conquistadasDiamante >= conquistasDiamante
+        ) {
+          conquistada = true;
+        } else if (countConquistas === countConquistadas) {
+          conquistada = true;
+        }
       }
 
       if (conquistada) {
+        countConquistadas++;
+
+        if (conquista.id.includes("Bronze")) conquistadasBronze++;
+        else if (conquista.id.includes("Prata")) conquistadasPrata++;
+        else if (conquista.id.includes("Ouro")) conquistadasOuro++;
+        else if (conquista.id.includes("Platina")) conquistadasPlatina++;
+        else if (conquista.id.includes("Diamante")) conquistadasDiamante++;
+
         conquistasObtidas[conquista.id] = {
           dataConquista: new Date().toISOString(),
         };
@@ -649,15 +731,24 @@ function exibirConquistasJogador(jogador) {
       cor = "#654321";
       if (conquista.id === "mestreConquistas") {
         cor = "#5f4b8b";
-      } else if (conquista.id.includes("Bronze") || conquista.id === "veterano") {
+      } else if (
+        conquista.id.includes("Bronze") ||
+        conquista.id === "veterano"
+      ) {
         cor = "#cd7f32";
       } else if (conquista.id.includes("Prata") || conquista.id === "mestre") {
         cor = "#c0c0c0";
       } else if (conquista.id.includes("Ouro") || conquista.id === "elite") {
         cor = "#ffd700";
-      } else if (conquista.id.includes("Platina") || conquista.id === "lendario") {
+      } else if (
+        conquista.id.includes("Platina") ||
+        conquista.id === "lendario"
+      ) {
         cor = "#e5e4e2";
-      } else if (conquista.id.includes("Diamante") || conquista.id === "supremo") {
+      } else if (
+        conquista.id.includes("Diamante") ||
+        conquista.id === "supremo"
+      ) {
         cor = "#b9f2ff";
       }
 
@@ -668,7 +759,7 @@ function exibirConquistasJogador(jogador) {
     }
 
     conquistasTrophHtml += `
-      <div class="conquista-item ${ conquistado ? "conquistado" : ""}">
+      <div class="conquista-item ${conquistado ? "conquistado" : ""}">
         <i class="fas fa-trophy" style="color: ${cor}; font-size: 20px; margin-right: 10px;"
         title="${conquista.nome} - ${status}"></i>
         <div style="opacity: ${opacity};">
@@ -677,18 +768,18 @@ function exibirConquistasJogador(jogador) {
           <span style="font-size: 14px;">${status}</span>
         </div>
       </div>`;
-    });
-    
+  });
+
   conquistasTrophHtml += "</div>";
   conquistasHTML += `
     <p class="conquista-text">
       <p style="text-align: center;" class="conquistado">${levelMax ? "" : `Progresso para próximo nível:`}</p></p>
       <div style="display: flex; align-items: center;">
-      <span style="font-size: 12px;" class="conquistado"><strong>Nível ${jogador.nivel }</strong></span>
+      <span style="font-size: 12px;" class="conquistado"><strong>Nível ${jogador.nivel}</strong></span>
         <div style="flex: 1; height: 10px; background-color: #ddd; border-radius: 5px; overflow: hidden; margin: 10px;">
           <div class="progress-bar-conquista" style="width: ${progresso}%; height: 100%;"></div>
         </div>
-        <span style="font-size: 12px;" class="${ levelMax ? "conquistado" : ""}">${textoProximoNivel}</span>
+        <span style="font-size: 12px;" class="${levelMax ? "conquistado" : ""}">${textoProximoNivel}</span>
       </div>
     </p>
     <p class="conquista-text"><strong>Pontuação Atual:</strong> ${jogador.pontuacao}</p>
@@ -713,9 +804,9 @@ function exibirConquistasJogador(jogador) {
 function carregarConquistas() {
   const conquistasRef = db.ref("conquistas");
   const ordemCategorias = [
-    "porTotalDeAcertos",
-    "porAcertosConsecutivos",
     "porTotalDeErros",
+    "porAcertosConsecutivos",
+    "porTotalDeAcertos",
     "porAtingirNiveis",
     "porConquistasConquistadas",
   ];
@@ -763,19 +854,19 @@ function carregarConquistas() {
                 });
               });
           } else if (categoria === "porConquistasConquistadas") {
-            Object.entries(itens)
-              .sort(
-                ([, a], [, b]) =>
-                  a.conquistasNecessarias - b.conquistasNecessarias
-              )
-              .forEach(([chave, conquista]) => {
-                conquistasList.push({
-                  categoria,
-                  id: chave,
-                  nome: conquista.nome,
-                  descricao: conquista.descricao,
-                });
-              });
+            ordemNiveis.push("mestre");
+            ordemNiveis.forEach((nivel) => {
+              for (const [chave, conquista] of Object.entries(itens)) {
+                if (chave.toLowerCase().includes(nivel)) {
+                  conquistasList.push({
+                    categoria,
+                    id: chave,
+                    nome: conquista.nome,
+                    descricao: conquista.descricao,
+                  });
+                }
+              }
+            });
           }
         }
       }
@@ -796,25 +887,39 @@ function searchLevels() {
 }
 
 // Função para buscar e ordenar o Top 10
-function updateLeaderboard() {
-  db.ref("jogadores")
+async function updateLeaderboard() {
+  const allPlayersSnapshot = await db
+    .ref("jogadores")
     .orderByChild("recorde")
-    .limitToLast(10)
-    .once("value", (snapshot) => {
-      const jogadores = snapshot.val();
-      top10List = Object.values(jogadores)
-        .map((jogador) => ({ nome: jogador.nome, recorde: jogador.recorde }))
-        .sort((a, b) => b.recorde - a.recorde); // Ordena os 10 maiores pela pontuação
-    });
-}
+    .once("value");
 
-// Atualizar o Top 10 em tempo real
-db.ref("jogadores").on("child_changed", (snapshot) => {
-  const jogadorAtualizado = snapshot.val();
-  if (jogadorAtualizado.recorde) {
-    updateLeaderboard();
+  const allPlayers = Object.entries(allPlayersSnapshot.val() || {})
+    .map(([uid, jogador]) => ({
+      uid,
+      nome: jogador.nome,
+      recorde: jogador.recorde,
+    }))
+    .sort((a, b) => b.recorde - a.recorde || a.uid.localeCompare(b.uid));
+
+  const userPosition =
+    allPlayers.findIndex((jogador) => jogador.uid === userLog.uid) + 1;
+
+  top10List = allPlayers.slice(0, 10).map((jogador, index) => ({
+    ...jogador,
+    posicao: index + 1,
+  }));
+
+  if (userPosition > 10) {
+    const userData = allPlayers.find((jogador) => jogador.uid === userLog.uid);
+
+    if (userData) {
+      top10List.push({
+        ...userData,
+        posicao: userPosition,
+      });
+    }
   }
-});
+}
 
 // Função editar nome do jogador
 function editPlayer() {
@@ -867,7 +972,6 @@ function editPlayer() {
   });
 }
 
+// Chamadas funções ao carregar arquivo
 carregarCategorias();
-updateLeaderboard();
 searchLevels();
-carregarConquistas();
