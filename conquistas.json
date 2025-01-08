@@ -24,6 +24,11 @@
       "acertosNecessarios": 25,
       "descricao": "Conquiste 25 acertos consecutivos",
       "nome": "Foco de Prata"
+    },
+    "focoSupremo": {
+      "acertosNecessarios": 500,
+      "descricao": "Conquiste 500 acertos consecutivos",
+      "nome": "Foco Supremo"
     }
   },
   "porAtingirNiveis": {
@@ -32,12 +37,12 @@
       "nivelNecessario": 3,
       "nome": "Jogador Aprendiz"
     },
-    "desbravador": {
+    "desbravadorBronze": {
       "descricao": "Alcance o nível 5 no jogo",
       "nivelNecessario": 5,
       "nome": "Jogador Desbravador"
     },
-    "elite": {
+    "elitePlatina": {
       "descricao": "Alcance o nível 8 no jogo",
       "nivelNecessario": 8,
       "nome": "Jogador Elite"
@@ -52,51 +57,55 @@
       "nivelNecessario": 2,
       "nome": "Jogador Iniciante"
     },
-    "lendario": {
+    "lendarioDiamante": {
       "descricao": "Alcance o nível 9 no jogo",
       "nivelNecessario": 9,
       "nome": "Jogador Lendário"
     },
-    "mestre": {
+    "mestreOuro": {
       "descricao": "Alcance o nível 7 no jogo",
       "nivelNecessario": 7,
       "nome": "Jogador Mestre"
     },
-    "supremo": {
+    "supremoSupremo": {
       "descricao": "Alcance o nível 10 no jogo",
       "nivelNecessario": 10,
       "nome": "Jogador Supremo"
     },
-    "veterano": {
+    "veteranoPrata": {
       "descricao": "Alcance o nível 6 no jogo",
       "nivelNecessario": 6,
       "nome": "Jogador Veterano"
     }
   },
   "porConquistasConquistadas": {
-    "mestreConquistas": {
-      "descricao": "Conquiste todas as conquistas",
-      "nome": "Mestre das Conquistas"
-    },
     "conquistadorBronze": {
-      "descricao": "Conquiste todas as conquistas bronzes",
+      "descricao": "Conquiste todas as conquistas de bronze",
       "nome": "Conquistador de Bronze"
     },
-    "conquistadorPrata": {
-      "descricao": "Conquiste todas as conquistas pratas",
-      "nome": "Conquistador de Prata"
+    "conquistadorDiamante": {
+      "descricao": "Conquiste todas as conquistas de diamante",
+      "nome": "Conquistador de Diamante"
     },
     "conquistadorOuro": {
-      "descricao": "Conquiste todas as conquistas ouros",
+      "descricao": "Conquiste todas as conquistas de ouro",
       "nome": "Conquistador de Ouro"
     },
     "conquistadorPlatina": {
-      "descricao": "Conquiste todas as conquistas platinas",
+      "descricao": "Conquiste todas as conquistas de platina",
       "nome": "Conquistador de Platina"
     },
-    "conquistadorDiamante": {
-      "descricao": "Conquiste todas as conquistas diamantes",
-      "nome": "Conquistador de Diamante"
+    "conquistadorPrata": {
+      "descricao": "Conquiste todas as conquistas de prata",
+      "nome": "Conquistador de Prata"
+    },
+    "mestreDasConquistas": {
+      "descricao": "Conquiste todas as conquistas",
+      "nome": "Mestre das Conquistas"
+    },
+    "conquistadorSupremo": {
+      "descricao": "Conquiste todas as conquistas supremas",
+      "nome": "Conquistador Supremo"
     }
   },
   "porTotalDeAcertos": {
@@ -124,6 +133,11 @@
       "acertosNecessarios": 500,
       "descricao": "Alcance 500 acertos no total",
       "nome": "Mestre da Platina"
+    },
+    "campeaoSupremo": {
+      "acertosNecessarios": 2500,
+      "descricao": "Alcance 2500 acertos no total",
+      "nome": "Campeão Supremo"
     }
   },
   "porTotalDeErros": {
@@ -151,6 +165,11 @@
       "descricao": "Acumule 50 erros no total",
       "errosNecessarios": 50,
       "nome": "Resiliência de Prata"
+    },
+    "resilienciaSupremo": {
+      "descricao": "Acumule 1000 erros no total",
+      "errosNecessarios": 1000,
+      "nome": "Resiliência Suprema"
     }
   }
 }

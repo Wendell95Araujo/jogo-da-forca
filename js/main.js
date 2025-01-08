@@ -30,11 +30,11 @@ let categoriaSelect = localStorage.getItem("categoriasSelect") || "todas";
 let palavraAtual = "";
 let acertoParaAvancar = 0;
 let erros = 0;
-let pontuacao;
-let pontuacaoMax;
-let acertosTotal;
-let errosTotal;
-let nivelAtual;
+let pontuacao = 0;
+let pontuacaoMax = 0;
+let acertosTotal = 0;
+let errosTotal = 0;
+let nivelAtual = 1;
 let conquistas = {};
 let letrasclicadas = [];
 let top10List = [];
@@ -65,7 +65,7 @@ function carregarPalavra() {
   // Carregar palavras usadas do localStorage
   const usadasCompressed = localStorage.getItem("palavrasUsadas") || "";
   palavrasUsadas = usadasCompressed ? usadasCompressed.split(",") : [];
-};
+}
 
 // Função iniciar o jogo
 $iniciarJogoBtn.on("click", iniciarJogo);
@@ -533,12 +533,14 @@ function verificarConquistasJogador(jogador) {
   let conquistasOuro = 0;
   let conquistasPlatina = 0;
   let conquistasDiamante = 0;
+  let conquistasSupremo = 0;
 
   let conquistadasBronze = 0;
   let conquistadasPrata = 0;
   let conquistadasOuro = 0;
   let conquistadasPlatina = 0;
   let conquistadasDiamante = 0;
+  let conquistadasSupremo = 0;
 
   let countConquistadas = Object.keys(conquistasObtidas).length;
 
@@ -548,6 +550,7 @@ function verificarConquistasJogador(jogador) {
     if (idConquista.includes("Ouro")) conquistadasOuro++;
     if (idConquista.includes("Platina")) conquistadasPlatina++;
     if (idConquista.includes("Diamante")) conquistadasDiamante++;
+    if (idConquista.includes("Supremo")) conquistadasSupremo++;
   });
 
   conquistasList.forEach((conquista) => {
@@ -557,8 +560,11 @@ function verificarConquistasJogador(jogador) {
       if (conquista.id.includes("Ouro")) conquistasOuro++;
       if (conquista.id.includes("Platina")) conquistasPlatina++;
       if (conquista.id.includes("Diamante")) conquistasDiamante++;
+      if (conquista.id.includes("Supremo")) conquistasSupremo++;
     }
   });
+
+  console.log(conquistasSupremo);
 
   // Verificar se o jogador avançou de nível
   niveisList.forEach((nivel) => {
@@ -589,7 +595,7 @@ function verificarConquistasJogador(jogador) {
   conquistasList.forEach((conquista) => {
     if (!conquistasObtidas[conquista.id]) {
       let conquistada = false;
-  
+
       if (
         conquista.categoria === "porTotalDeAcertos" &&
         acertosTotais >= conquista.acertosNecessarios
@@ -738,25 +744,18 @@ function exibirConquistasJogador(jogador) {
       cor = "#654321";
       if (conquista.id === "mestreConquistas") {
         cor = "#5f4b8b";
-      } else if (
-        conquista.id.includes("Bronze") ||
-        conquista.id === "veterano"
-      ) {
+      } else if (conquista.id.includes("Bronze")) {
         cor = "#cd7f32";
-      } else if (conquista.id.includes("Prata") || conquista.id === "mestre") {
+      } else if (conquista.id.includes("Prata")) {
         cor = "#c0c0c0";
-      } else if (conquista.id.includes("Ouro") || conquista.id === "elite") {
+      } else if (conquista.id.includes("Ouro")) {
         cor = "#ffd700";
-      } else if (
-        conquista.id.includes("Platina") ||
-        conquista.id === "lendario"
-      ) {
+      } else if (conquista.id.includes("Platina")) {
         cor = "#e5e4e2";
-      } else if (
-        conquista.id.includes("Diamante") ||
-        conquista.id === "supremo"
-      ) {
+      } else if (conquista.id.includes("Diamante")) {
         cor = "#b9f2ff";
+      } else if (conquista.id.includes("Supremo")) {
+        cor = "#ff69b4";
       }
 
       countConquistadas++;
@@ -780,13 +779,13 @@ function exibirConquistasJogador(jogador) {
   conquistasTrophHtml += "</div>";
   conquistasHTML += `
     <p class="conquista-text">
-      <p style="text-align: center;" class="conquistado">${levelMax ? "" : `Progresso para próximo nível:`}</p></p>
+      <p style="text-align: center;" class="conquistado">${ levelMax ? "" : `Progresso para próximo nível:`}</p></p>
       <div style="display: flex; align-items: center;">
-      <span style="font-size: 12px;" class="conquistado"><strong>Nível ${jogador.nivel}</strong></span>
+      <span style="font-size: 12px;" class="conquistado"><strong>Nível ${jogador.nivel }</strong></span>
         <div style="flex: 1; height: 10px; background-color: #ddd; border-radius: 5px; overflow: hidden; margin: 10px;">
           <div class="progress-bar-conquista" style="width: ${progresso}%; height: 100%;"></div>
         </div>
-        <span style="font-size: 12px;" class="${levelMax ? "conquistado" : ""}">${textoProximoNivel}</span>
+        <span style="font-size: 12px;" class="${ levelMax ? "conquistado" : ""}">${textoProximoNivel}</span>
       </div>
     </p>
     <p class="conquista-text"><strong>Pontuação Atual:</strong> ${jogador.pontuacao}</p>
@@ -817,7 +816,14 @@ function carregarConquistas() {
     "porAtingirNiveis",
     "porConquistasConquistadas",
   ];
-  const ordemNiveis = ["bronze", "prata", "ouro", "platina", "diamante"];
+  const ordemNiveis = [
+    "bronze",
+    "prata",
+    "ouro",
+    "platina",
+    "diamante",
+    "supremo",
+  ];
 
   conquistasRef.once("value").then((snapshot) => {
     if (snapshot.exists()) {
@@ -908,11 +914,12 @@ async function updateLeaderboard() {
       acertosTotal: jogador.acertosTotal || 0,
       errosTotal: jogador.errosTotal || 0,
     }))
-    .sort((a, b) => 
-      b.recorde - a.recorde ||
-      b.acertosTotal - a.acertosTotal ||
-      a.errosTotal - b.errosTotal ||
-      a.uid.localeCompare(b.uid)
+    .sort(
+      (a, b) =>
+        b.recorde - a.recorde ||
+        b.acertosTotal - a.acertosTotal ||
+        a.errosTotal - b.errosTotal ||
+        a.uid.localeCompare(b.uid)
     );
 
   const userPosition =
@@ -934,7 +941,6 @@ async function updateLeaderboard() {
     }
   }
 }
-
 
 // Função editar nome do jogador
 function editPlayer() {
