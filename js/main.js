@@ -41,6 +41,31 @@ let top10List = [];
 let niveisList = [];
 let conquistasList = [];
 let lastAccess = sessionStorage.getItem("lastAccess") || null;
+let todasPalavras = {};
+let palavrasUsadas = [];
+
+function carregarPalavra() {
+  const palavrasRef = db.ref("palavras");
+  palavrasRef
+    .once("value")
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        todasPalavras = snapshot.val();
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao carregar palavras:", error);
+      Swal.fire(
+        "Erro",
+        "Não foi possível carregar as palavras. Tente novamente.",
+        "error"
+      );
+    });
+
+  // Carregar palavras usadas do localStorage
+  const usadasCompressed = localStorage.getItem("palavrasUsadas") || "";
+  palavrasUsadas = usadasCompressed ? usadasCompressed.split(",") : [];
+};
 
 // Função iniciar o jogo
 $iniciarJogoBtn.on("click", iniciarJogo);
@@ -58,59 +83,41 @@ function iniciarJogo() {
 
   let palavras = [];
 
-  const palavrasRef = db.ref("palavras");
-  palavrasRef
-    .once("value")
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        if (categoriasSelecionadas.includes("todas")) {
-          snapshot.forEach((catSnap) => {
-            palavras.push(...catSnap.val());
-          });
-        } else {
-          categoriasSelecionadas.forEach((categoria) => {
-            if (snapshot.val()[categoria]) {
-              palavras.push(...snapshot.val()[categoria]);
-            }
-          });
-        }
-
-        const usadasCompressed = localStorage.getItem("palavrasUsadas") || "";
-        const usadas = usadasCompressed ? usadasCompressed.split(",") : [];
-
-        palavras = palavras.filter((palavra) => !usadas.includes(palavra));
-
-        if (palavras.length === 0) {
-          localStorage.removeItem("palavrasUsadas");
-          iniciarJogo();
-          return;
-        }
-
-        palavraAtual = palavras[Math.floor(Math.random() * palavras.length)];
-        usadas.push(palavraAtual);
-        const novasUsadasCompressed = usadas.join(",");
-        localStorage.setItem("palavrasUsadas", novasUsadasCompressed);
-
-        const categoriaPalavra = Object.keys(snapshot.val()).find((cat) =>
-          snapshot.val()[cat].includes(palavraAtual)
-        );
-        const categoriaText = categoriaPalavra || "Categoria desconhecida";
-
-        $dicaDiv.text(`CATEGORIA: ${categoriaText.toUpperCase()}`);
-        mostrarPalavra();
-        criarTeclado();
-        erros = 0;
-        partesBoneco.forEach((parte) => parte.hide());
-      }
-    })
-    .catch((error) => {
-      console.error("Erro ao carregar palavras:", error);
-      Swal.fire(
-        "Erro",
-        "Não foi possível carregar as palavras. Tente novamente.",
-        "error"
-      );
+  if (categoriasSelecionadas.includes("todas")) {
+    Object.values(todasPalavras).forEach((catPalavras) => {
+      palavras.push(...catPalavras);
     });
+  } else {
+    categoriasSelecionadas.forEach((categoria) => {
+      if (todasPalavras[categoria]) {
+        palavras.push(...todasPalavras[categoria]);
+      }
+    });
+  }
+
+  palavras = palavras.filter((palavra) => !palavrasUsadas.includes(palavra));
+
+  if (palavras.length === 0) {
+    localStorage.removeItem("palavrasUsadas");
+    palavrasUsadas = [];
+    iniciarJogo();
+    return;
+  }
+
+  palavraAtual = palavras[Math.floor(Math.random() * palavras.length)];
+  palavrasUsadas.push(palavraAtual);
+  localStorage.setItem("palavrasUsadas", palavrasUsadas.join(","));
+
+  const categoriaPalavra = Object.keys(todasPalavras).find((cat) =>
+    todasPalavras[cat].includes(palavraAtual)
+  );
+  const categoriaText = categoriaPalavra || "Categoria desconhecida";
+
+  $dicaDiv.text(`CATEGORIA: ${categoriaText.toUpperCase()}`);
+  mostrarPalavra();
+  criarTeclado();
+  erros = 0;
+  partesBoneco.forEach((parte) => parte.hide());
 }
 
 // Função para exibir palavra na tela
@@ -185,7 +192,7 @@ function verificarLetra(letra) {
         title: `<i class="fa-solid fa-check"></i> Parabéns, você acertou a palavra!`,
       }).then((result) => {
         if (!result.isConfirmed) return;
-        if (userLog) {
+        if (userLogado) {
           verificarConquistasJogador(userLogado);
         }
         iniciarJogo();
@@ -223,7 +230,7 @@ function verificarLetra(letra) {
         })
         .then((result) => {
           if (!result.isConfirmed) return;
-          if (userLog) {
+          if (userLogado) {
             verificarConquistasJogador(userLogado);
           }
           iniciarJogo();
@@ -871,7 +878,7 @@ function carregarConquistas() {
         }
       }
 
-      if (userLog) verificarConquistasJogador(userLogado);
+      if (userLogado) verificarConquistasJogador(userLogado);
     } else {
       console.warn("Nenhuma conquista encontrada no Firebase.");
     }
@@ -898,8 +905,15 @@ async function updateLeaderboard() {
       uid,
       nome: jogador.nome,
       recorde: jogador.recorde,
+      acertosTotal: jogador.acertosTotal || 0,
+      errosTotal: jogador.errosTotal || 0,
     }))
-    .sort((a, b) => b.recorde - a.recorde || a.uid.localeCompare(b.uid));
+    .sort((a, b) => 
+      b.recorde - a.recorde ||
+      b.acertosTotal - a.acertosTotal ||
+      a.errosTotal - b.errosTotal ||
+      a.uid.localeCompare(b.uid)
+    );
 
   const userPosition =
     allPlayers.findIndex((jogador) => jogador.uid === userLog.uid) + 1;
@@ -920,6 +934,7 @@ async function updateLeaderboard() {
     }
   }
 }
+
 
 // Função editar nome do jogador
 function editPlayer() {
@@ -973,5 +988,6 @@ function editPlayer() {
 }
 
 // Chamadas funções ao carregar arquivo
+carregarPalavra();
 carregarCategorias();
 searchLevels();

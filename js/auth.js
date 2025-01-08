@@ -143,18 +143,29 @@ function showmModalLogin() {
 
       return auth
         .signInWithEmailAndPassword(email, senha)
-        .then(() => {
-          Swal.fire({
-            toast: true,
-            position: "center",
-            icon: "success",
-            title: "Login efetuado com sucesso!",
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-          }).then(() => {
-            verificarAutenticacao();
-          });
+        .then((userCredential) => {
+          const user = userCredential.user;
+
+          if (!user.emailVerified) {
+            userLogado = null;
+            Swal.showValidationMessage(
+              "Seu email ainda não foi verificado. Por favor, verifique seu email antes de continuar."
+            );
+            logout(false);
+            return false;
+          } else {
+            Swal.fire({
+              toast: true,
+              position: "center",
+              icon: "success",
+              title: "Login efetuado com sucesso!",
+              timer: 2000,
+              timerProgressBar: true,
+              showConfirmButton: false,
+            }).then(() => {
+              verificarAutenticacao();
+            });
+          }
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -208,6 +219,7 @@ function showModalRegister() {
       `,
     showCloseButton: true,
     showDenyButton: true,
+    showLoaderOnConfirm: true,
     confirmButtonText: `<i class="fas fa-user-plus"></i> Registrar`,
     denyButtonText: `<i class="fas fa-sign-in-alt"></i> Entrar`,
     customClass: {
@@ -266,30 +278,44 @@ function showModalRegister() {
             .createUserWithEmailAndPassword(email, senha)
             .then((userCredential) => {
               const user = userCredential.user;
-              const uid = user.uid;
-              const userRef = db.ref(`jogadores/${uid}`);
-              userRef.set({
-                nome: nomeJogador,
-                pontuacao: 0,
-                recorde: 0,
-                nivel: 1,
-                errosTotal: 0,
-                acertosTotal: 0,
-                categorias: ["todas"],
-              });
 
-              Swal.fire({
-                toast: true,
-                position: "center",
-                icon: "success",
-                title: "Conta criada com sucesso!",
-                text: `Bem-vindo, ${nomeJogador}!`,
-                confirmButtonText: "OK",
-                customClass: {
-                  confirmButton: "btn btn-primary",
-                },
-              });
-              verificarAutenticacao();
+              return user
+                .updateProfile({ displayName: nomeJogador })
+                .then(() => {
+                  return user.sendEmailVerification().then(() => {
+                    const uid = user.uid;
+                    const userRef = db.ref(`jogadores/${uid}`);
+                    userRef.set({
+                      nome: nomeJogador,
+                      pontuacao: 0,
+                      recorde: 0,
+                      nivel: 1,
+                      errosTotal: 0,
+                      acertosTotal: 0,
+                      categorias: ["todas"],
+                    });
+
+                    logout(false);
+                    Swal.fire({
+                      toast: true,
+                      position: "center",
+                      icon: "success",
+                      title: "Conta criada com sucesso!",
+                      text: `Verifique seu email para ativar a conta.`,
+                      confirmButtonText: "OK",
+                      customClass: {
+                        confirmButton: "btn btn-primary",
+                      },
+                    });
+                    verificarAutenticacao();
+                  });
+                })
+                .catch((error) => {
+                  console.error("Erro ao atualizar displayName:", error);
+                  Swal.showValidationMessage(
+                    "Erro ao atualizar nome do usuário. Tente novamente."
+                  );
+                });
             })
             .catch((error) => {
               const errorCode = error.code;
@@ -333,7 +359,15 @@ function showModalRegister() {
 // Função exibir modal logout
 $btnLogout.on("click", logout);
 
-function logout() {
+function logout(showToast = true) {
+  if (!showToast) {
+    auth.signOut().then(() => {
+      userLogado = null;
+      localStorage.clear();
+      verificarAutenticacao();
+    });
+    return;
+  }
   Swal.fire({
     title: "Sair",
     text: "Tem certeza que deseja sair?",
@@ -349,12 +383,8 @@ function logout() {
     if (result.isConfirmed) {
       auth.signOut().then(() => {
         userLogado = null;
-        $("#btnAuth").html(
-          `<i class="fas fa-user"></i>
-            <span>Entrar</span>`
-        );
-        $("#logado").css("display", "none");
         localStorage.clear();
+        verificarAutenticacao();
         Swal.fire({
           toast: true,
           position: "center",
