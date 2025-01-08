@@ -564,8 +564,6 @@ function verificarConquistasJogador(jogador) {
     }
   });
 
-  console.log(conquistasSupremo);
-
   // Verificar se o jogador avançou de nível
   niveisList.forEach((nivel) => {
     if (acertosParaAvancar >= nivel.acertosParaAvancar) {
