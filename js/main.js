@@ -157,29 +157,6 @@ function verificarLetra(letra) {
     $palavraDiv.text(letrasExibidas.join(""));
 
     if (!letrasExibidas.includes("_")) {
-      pontuacao++;
-      acertosTotal++;
-      acertoParaAvancar++;
-      localStorage.setItem("pontuacao", pontuacao);
-      if (pontuacao > pontuacaoMax) {
-        pontuacaoMax = pontuacao;
-        localStorage.setItem("pontuacaoMax", pontuacaoMax);
-        $record.text(`Recorde: ${pontuacaoMax}`);
-      }
-      $pontuacao.text(`Pontuação: ${pontuacao}`);
-      if (userLog) {
-        db.ref(`jogadores/${userLog.uid}`).update({
-          recorde: pontuacaoMax,
-          pontuacao: pontuacao,
-          acertosTotal: acertosTotal,
-          acertoParaAvancar: acertoParaAvancar,
-        });
-
-        userLogado.recorde = pontuacaoMax;
-        userLogado.pontuacao = pontuacao;
-        userLogado.acertosTotal = acertosTotal;
-        userLogado.acertoParaAvancar = acertoParaAvancar;
-      }
       Swal.fire({
         toast: true,
         position: "center",
@@ -190,6 +167,31 @@ function verificarLetra(letra) {
           confirmButton: "btn btn-primary",
         },
         title: `<i class="fa-solid fa-check"></i> Parabéns, você acertou a palavra!`,
+        didOpen: () => {
+          pontuacao++;
+          acertosTotal++;
+          acertoParaAvancar++;
+          localStorage.setItem("pontuacao", pontuacao);
+          if (pontuacao > pontuacaoMax) {
+            pontuacaoMax = pontuacao;
+            localStorage.setItem("pontuacaoMax", pontuacaoMax);
+            $record.text(`Recorde: ${pontuacaoMax}`);
+          }
+          $pontuacao.text(`Pontuação: ${pontuacao}`);
+          if (userLog) {
+            db.ref(`jogadores/${userLog.uid}`).update({
+              recorde: pontuacaoMax,
+              pontuacao: pontuacao,
+              acertosTotal: acertosTotal,
+              acertoParaAvancar: acertoParaAvancar,
+            });
+
+            userLogado.recorde = pontuacaoMax;
+            userLogado.pontuacao = pontuacao;
+            userLogado.acertosTotal = acertosTotal;
+            userLogado.acertoParaAvancar = acertoParaAvancar;
+          }
+        }
       }).then((result) => {
         if (!result.isConfirmed) return;
         if (userLogado) {
@@ -204,17 +206,6 @@ function verificarLetra(letra) {
     if (erros < partesBoneco.length) {
       partesBoneco[erros - 1].show();
     } else {
-      pontuacao = 0;
-      errosTotal++;
-      if (userLog) {
-        db.ref(`jogadores/${userLog.uid}`).update({
-          pontuacao: pontuacao,
-          errosTotal: errosTotal,
-        });
-
-        userLogado.pontuacao = pontuacao;
-        userLogado.errosTotal = errosTotal;
-      }
       swal
         .fire({
           toast: true,
@@ -227,6 +218,19 @@ function verificarLetra(letra) {
           },
           title: `<i class="fa-solid fa-xmark"></i> Que pena, você perdeu!`,
           html: `A palavra era: <strong>${palavraAtual.toUpperCase()}</strong>. Tente novamente!`,
+          didOpen: () => {
+            pontuacao = 0;
+            errosTotal++;
+            if (userLog) {
+              db.ref(`jogadores/${userLog.uid}`).update({
+                pontuacao: pontuacao,
+                errosTotal: errosTotal,
+              });
+
+              userLogado.pontuacao = pontuacao;
+              userLogado.errosTotal = errosTotal;
+            }
+          }
         })
         .then((result) => {
           if (!result.isConfirmed) return;
@@ -706,6 +710,7 @@ function exibirConquistasJogador(jogador) {
   const conquistasJogador = jogador.conquistas || {};
   const nivelAtual = niveisList.find((n) => n.nivel === jogador.nivel);
   const proximoNivel = niveisList.find((n) => n.nivel === jogador.nivel + 1);
+  const nivelNome = nivelAtual.nome;
 
   let progresso = 100;
   let levelMax = true;
@@ -786,6 +791,7 @@ function exibirConquistasJogador(jogador) {
         <span style="font-size: 12px;" class="${ levelMax ? "conquistado" : ""}">${textoProximoNivel}</span>
       </div>
     </p>
+    <p class="conquista-text"><strong>Nível ${jogador.nivel}</strong> (${nivelNome})</p>
     <p class="conquista-text"><strong>Pontuação Atual:</strong> ${jogador.pontuacao}</p>
     <p class="conquista-text"><strong>Total de erros:</strong> ${jogador.errosTotal}</p>
     <p class="conquista-text"><strong>Total de acertos:</strong> ${jogador.acertosTotal}</p>
@@ -799,8 +805,14 @@ function exibirConquistasJogador(jogador) {
   Swal.fire({
     title: `<i class="fas fa-trophy"></i> Conquistas de ${jogador.nome}`,
     html: conquistasHTML,
-    showConfirmButton: false,
+    showConfirmButton: true,
     showCloseButton: true,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    confirmButtonText: "Fechar",
+    customClass: {
+      confirmButton: "btn btn-primary",
+    },
   });
 }
 
@@ -808,10 +820,10 @@ function exibirConquistasJogador(jogador) {
 function carregarConquistas() {
   const conquistasRef = db.ref("conquistas");
   const ordemCategorias = [
+    "porAtingirNiveis",
     "porTotalDeErros",
     "porAcertosConsecutivos",
     "porTotalDeAcertos",
-    "porAtingirNiveis",
     "porConquistasConquistadas",
   ];
   const ordemNiveis = [
