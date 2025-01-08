@@ -325,8 +325,8 @@ button,
 
 button:hover:not(:disabled),
 .btn:hover {
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3) !important;
-  background-image: none !important;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  background-image: none;
 }
 
 #reiniciarJogo,
@@ -466,8 +466,13 @@ footer p {
   background-color: var(--primary-color) !important;
 }
 
+.swal2-close {
+  box-shadow: none !important;
+}
+
 .swal2-close:hover {
   color: var(--primary-color) !important;
+  box-shadow: none !important;
 }
 
 .custom-icon-class {
