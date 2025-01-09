@@ -177,53 +177,103 @@
   "jogadores": {
     "1": {
       "nome": "Tiradentes",
-      "pontuacao": 0,
-      "recorde": 10
+      "pontuacao": 10,
+      "recorde": 10,
+      "acertosTotal": 30,
+      "errosTotal": 5,
+      "acertosParaAvancar": 10,
+      "categorias": ["todas"],
+      "nivel": 2
     },
     "2": {
       "nome": "Anne Boleyn",
-      "pontuacao": 0,
-      "recorde": 9
+      "pontuacao": 4,
+      "recorde": 9,
+      "acertosTotal": 20,
+      "errosTotal": 2,
+      "acertosParaAvancar": 0,
+      "categorias": ["todas"],
+      "nivel": 2
     },
     "3": {
       "nome": "Joana d'Arc",
-      "pontuacao": 0,
-      "recorde": 8
+      "pontuacao": 3,
+      "recorde": 8,
+      "acertosTotal": 15,
+      "errosTotal": 4,
+      "acertosParaAvancar": 15,
+      "categorias": ["todas"],
+      "nivel": 1
     },
     "4": {
       "nome": "Nathan Hale",
-      "pontuacao": 0,
-      "recorde": 7
+      "pontuacao": 5,
+      "recorde": 7,
+      "acertosTotal": 22,
+      "errosTotal": 8,
+      "acertosParaAvancar": 2,
+      "categorias": ["todas"],
+      "nivel": 2
     },
     "5": {
       "nome": "Saddam Hussein",
-      "pontuacao": 0,
-      "recorde": 6
+      "pontuacao": 4,
+      "recorde": 6,
+      "acertosTotal": 20,
+      "errosTotal": 2,
+      "acertosParaAvancar": 0,
+      "categorias": ["todas"],
+      "nivel": 2
     },
     "6": {
       "nome": "Guy Fawkes",
-      "pontuacao": 0,
-      "recorde": 5
+      "pontuacao": 1,
+      "recorde": 5,
+      "acertosTotal": 21,
+      "errosTotal": 8,
+      "acertosParaAvancar": 1,
+      "categorias": ["todas"],
+      "nivel": 2
     },
     "7": {
       "nome": "Mary Surratt",
-      "pontuacao": 0,
-      "recorde": 4
+      "pontuacao": 2,
+      "recorde": 4,
+      "acertosTotal": 8,
+      "errosTotal": 3,
+      "acertosParaAvancar": 8,
+      "categorias": ["todas"],
+      "nivel": 1
     },
     "8": {
       "nome": "Cesare Borgia",
-      "pontuacao": 0,
-      "recorde": 3
+      "pontuacao": 3,
+      "recorde": 3,
+      "acertosTotal": 10,
+      "errosTotal": 4,
+      "acertosParaAvancar": 10,
+      "categorias": ["todas"],
+      "nivel": 1
     },
     "9": {
       "nome": "Thomas Cromwell",
       "pontuacao": 0,
-      "recorde": 2
+      "recorde": 2,
+      "acertosTotal": 2,
+      "errosTotal": 1,
+      "acertosParaAvancar": 2,
+      "categorias": ["todas"],
+      "nivel": 1
     },
     "10": {
       "nome": "William Wallace",
-      "pontuacao": 0,
-      "recorde": 1
+      "pontuacao": 1,
+      "recorde": 1,
+      "acertosTotal": 1,
+      "errosTotal": 2,
+      "acertosParaAvancar": 1,
+      "categorias": ["todas"],
+      "nivel": 1
     }
   },
   "niveis": [

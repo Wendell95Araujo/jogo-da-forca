@@ -244,6 +244,12 @@ h1 {
 }
 
 /*Estilo da tabela top 10*/
+.table-top10-title {
+  font-weight: bold;
+  text-align: center;
+  color: var(--primary-color);
+}
+
 #top10-table {
   width: 100%;
   border-collapse: collapse;

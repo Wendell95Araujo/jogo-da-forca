@@ -37,7 +37,8 @@ let errosTotal = 0;
 let nivelAtual = 1;
 let conquistas = {};
 let letrasclicadas = [];
-let top10List = [];
+let top10RecordeList = [];
+let top10AcertoTotalList = [];
 let niveisList = [];
 let conquistasList = [];
 let lastAccess = sessionStorage.getItem("lastAccess") || null;
@@ -442,10 +443,11 @@ function configGame() {
 }
 
 // Funçao exibir modal top10
-$btnTop10.on("click", showTop10Modal);
-function showTop10Modal() {
-  const tableRows = top10List
-    .map((player, index) => {
+$btnTop10.on("click", showTop10RecordeModal);
+
+function showTop10RecordeModal() {
+  const tableRows = top10RecordeList
+    .map((player) => {
       const position = player?.posicao || "-";
       const name = player?.nome || "-";
       const score = player?.recorde || 0;
@@ -456,9 +458,7 @@ function showTop10Modal() {
       let highlightClass = "";
       let positionHTML = `${position}º`;
 
-      if (isCurrentUser) {
-        highlightClass = "highlight";
-      }
+      if (isCurrentUser) highlightClass = "highlight";
 
       if (position === 1) {
         positionHTML = `<i class="fas fa-medal" style="color: #ffd700;" title="1º Lugar"></i>`;
@@ -482,30 +482,113 @@ function showTop10Modal() {
     .join("");
 
   const tableHTML = `
-    <table id="top10-table">
-      <thead>
-        <tr class="table-header">
-          <th>Posição</th>
-          <th>Nome</th>
-          <th>Recorde</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${
-          tableRows ||
-          "<tr><td colspan='3' style='text-align: center;'>Nenhum jogador encontrado</td></tr>"
-        }
-      </tbody>
-    </table>
+    <div>
+      <p class="table-top10-title">Ranking por Acertos Consecutivos</p>
+      <table id="top10-table">
+        <thead>
+          <tr class="table-header">
+            <th>Posição</th>
+            <th>Nome</th>
+            <th>Recorde</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${
+            tableRows ||
+            "<tr><td colspan='3' style='text-align: center;'>Nenhum jogador encontrado</td></tr>"
+          }
+        </tbody>
+      </table>
+    </div>
   `;
 
   Swal.fire({
-    title: `<i class="fas fa-ranking-star"></i> Top 10 Jogadores`,
+    title: `<i class="fas fa-ranking-star"></i> Top 10`,
     html: tableHTML,
-    showConfirmButton: false,
     showCloseButton: true,
+    showConfirmButton: true,
+    confirmButtonText: `<i class="fas fa-trophy"></i> Top 10 Acertos Totais`,
+    customClass: {
+      confirmButton: "btn btn-primary",
+    },
+    preConfirm: () => {
+      showTop10AcertoTotalModal();
+    },
   });
 }
+
+function showTop10AcertoTotalModal() {
+  const tableRows = top10AcertoTotalList
+    .map((player) => {
+      const position = player?.posicao || "-";
+      const name = player?.nome || "-";
+      const score = player?.acertosTotal || 0;
+      const uid = player?.uid || "-";
+
+      const isCurrentUser = uid === userLog.uid;
+
+      let highlightClass = "";
+      let positionHTML = `${position}º`;
+
+      if (isCurrentUser) highlightClass = "highlight";
+
+      if (position === 1) {
+        positionHTML = `<i class="fas fa-medal" style="color: #ffd700;" title="1º Lugar"></i>`;
+        if (isCurrentUser) highlightClass = "highlight-first";
+      } else if (position === 2) {
+        positionHTML = `<i class="fas fa-medal" style="color: #c0c0c0;" title="2º Lugar"></i>`;
+        if (isCurrentUser) highlightClass = "highlight-second";
+      } else if (position === 3) {
+        positionHTML = `<i class="fas fa-medal" style="color: #cd7f32;" title="3º Lugar"></i>`;
+        if (isCurrentUser) highlightClass = "highlight-third";
+      }
+
+      return `
+        <tr class="table-row ${highlightClass}">
+          <td>${positionHTML}</td>
+          <td>${name}</td>
+          <td>${score}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const tableHTML = `
+    <div>
+      <p class="table-top10-title">Ranking por Acertos Totais</p>
+      <table id="top10-table">
+        <thead>
+          <tr class="table-header">
+            <th>Posição</th>
+            <th>Nome</th>
+            <th>Acertos Totais</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${
+            tableRows ||
+            "<tr><td colspan='3' style='text-align: center;'>Nenhum jogador encontrado</td></tr>"
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  Swal.fire({
+    title: `<i class="fas fa-ranking-star"></i> Top 10`,
+    html: tableHTML,
+    showCloseButton: true,
+    showConfirmButton: true,
+    confirmButtonText: `<i class="fas fa-trophy"></i> Top 10 Acertos Consecutivos`,
+    customClass: {
+      confirmButton: "btn btn-primary",
+    },
+    preConfirm: () => {
+      showTop10RecordeModal();
+    },
+  });
+}
+
 
 // Função para carregar categorias do Firebase
 function carregarCategorias() {
@@ -913,44 +996,75 @@ function searchLevels() {
 async function updateLeaderboard() {
   const allPlayersSnapshot = await db
     .ref("jogadores")
-    .orderByChild("recorde")
     .once("value");
 
   const allPlayers = Object.entries(allPlayersSnapshot.val() || {})
     .map(([uid, jogador]) => ({
       uid,
       nome: jogador.nome,
-      recorde: jogador.recorde,
+      recorde: jogador.recorde || 0,
       acertosTotal: jogador.acertosTotal || 0,
       errosTotal: jogador.errosTotal || 0,
-    }))
-    .sort(
-      (a, b) =>
-        b.recorde - a.recorde ||
-        b.acertosTotal - a.acertosTotal ||
-        a.errosTotal - b.errosTotal ||
-        a.uid.localeCompare(b.uid)
-    );
+    }));
 
-  const userPosition =
-    allPlayers.findIndex((jogador) => jogador.uid === userLog.uid) + 1;
+  // Ordena por recorde
+  const sortedByRecorde = [...allPlayers].sort(
+    (a, b) =>
+      b.recorde - a.recorde ||
+      b.acertosTotal - a.acertosTotal ||
+      a.errosTotal - b.errosTotal ||
+      a.uid.localeCompare(b.uid)
+  );
 
-  top10List = allPlayers.slice(0, 10).map((jogador, index) => ({
+  // Ordena por acertosTotal
+  const sortedByAcertosTotal = [...allPlayers].sort(
+    (a, b) =>
+      b.acertosTotal - a.acertosTotal ||
+      b.recorde - a.recorde ||
+      a.errosTotal - b.errosTotal ||
+      a.uid.localeCompare(b.uid)
+  );
+
+  // Define as listas top 10
+  top10RecordeList = sortedByRecorde.slice(0, 10).map((jogador, index) => ({
     ...jogador,
     posicao: index + 1,
   }));
 
-  if (userPosition > 10) {
-    const userData = allPlayers.find((jogador) => jogador.uid === userLog.uid);
+  top10AcertoTotalList = sortedByAcertosTotal.slice(0, 10).map((jogador, index) => ({
+    ...jogador,
+    posicao: index + 1,
+  }));
 
+  // Verifica a posição do jogador logado na lista ordenada por recorde
+  const userPositionByRecorde =
+    sortedByRecorde.findIndex((jogador) => jogador.uid === userLog.uid) + 1;
+
+  if (userPositionByRecorde > 10) {
+    const userData = sortedByRecorde.find((jogador) => jogador.uid === userLog.uid);
     if (userData) {
-      top10List.push({
+      top10RecordeList.push({
         ...userData,
-        posicao: userPosition,
+        posicao: userPositionByRecorde,
+      });
+    }
+  }
+
+  // Verifica a posição do jogador logado na lista ordenada por acertosTotal
+  const userPositionByAcertosTotal =
+    sortedByAcertosTotal.findIndex((jogador) => jogador.uid === userLog.uid) + 1;
+
+  if (userPositionByAcertosTotal > 10) {
+    const userData = sortedByAcertosTotal.find((jogador) => jogador.uid === userLog.uid);
+    if (userData) {
+      top10AcertoTotalList.push({
+        ...userData,
+        posicao: userPositionByAcertosTotal,
       });
     }
   }
 }
+
 
 // Função editar nome do jogador
 function editPlayer() {
